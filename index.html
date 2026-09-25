@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Бронирование № 123456 — Домклик</title>
+  <meta name="description" content="Новогодняя мини-игра на экране ожидания Домклик" />
+  <link rel="stylesheet" href="assets/styles.css?v=20260924-second-round-ui1" />
+</head>
+<body>
+  <main class="prototype" id="prototype" data-state="compact">
+    <img class="screen" id="screen" src="assets/ui-compact.png" alt="Экран бронирования Домклик" />
+    <div class="game-bottom-cleanup" aria-hidden="true"></div>
+    <div class="final-erasure" aria-hidden="true"></div>
+
+    <button class="hotspot teaser-hotspot" id="teaserBtn" aria-label="Открыть игру"></button>
+    <div class="snow teaser-snow" aria-hidden="true"></div>
+    <div class="teaser-erasure" aria-hidden="true"></div>
+    <button class="teaser-close" id="teaserCloseBtn" type="button" aria-label="Закрыть баннер «Скоротать время»"></button>
+    <div class="field-transition" aria-hidden="true"><div class="field-transition-teaser"></div><div class="field-transition-ice"></div></div>
+    <button class="hotspot start-hotspot" id="startBtn" aria-label="Начать игру"></button>
+    <button class="hotspot restart-hotspot" id="restartBtn" aria-label="Сыграть ещё раз"></button>
+    <button class="hotspot close-hotspot" id="closeBtn" aria-label="Закрыть игру"></button>
+
+    <section class="static-game" aria-hidden="true">
+      <div class="static-ice-mask"><img src="assets/ui-start.png?v=20260923-clean4" alt="" /></div>
+      <span class="static-close">×</span>
+
+      <div class="static-hud">
+        <span><b id="resultClock">00:00</b><em>До финиша 0 м</em></span>
+        <span><b id="resultPuddles">0</b><em>Льдин</em></span>
+        <span><b id="resultScore">0</b><em>Очков</em></span>
+      </div>
+
+      <div class="static-skates-start skate-pair-crop"><img src="assets/figma-skates-pairs.png?v=20260923-clean4" alt="" /></div>
+      <div class="static-skates-result">
+        <svg class="result-lights" viewBox="0 0 1312 1199" aria-hidden="true" focusable="false">
+          <defs>
+            <filter id="result-light-blur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="11" /></filter>
+            <radialGradient id="result-star-glow"><stop stop-color="#fff" stop-opacity=".95" /><stop offset=".28" stop-color="#c4faff" stop-opacity=".7" /><stop offset="1" stop-color="#87bbff" stop-opacity="0" /></radialGradient>
+          </defs>
+          <g class="result-trace trace-upper">
+            <path class="trace-glow" pathLength="1000" d="M 668 247 C 790 174 936 159 1080 197 C 1205 230 1250 311 1170 407 L 1100 452" />
+            <path class="trace-core" pathLength="1000" d="M 668 247 C 790 174 936 159 1080 197 C 1205 230 1250 311 1170 407 L 1100 452" />
+          </g>
+          <g class="result-trace trace-left">
+            <path class="trace-glow" pathLength="1000" d="M 276 446 C 145 464 61 535 52 621 C 41 699 107 762 205 790" />
+            <path class="trace-core" pathLength="1000" d="M 276 446 C 145 464 61 535 52 621 C 41 699 107 762 205 790" />
+          </g>
+          <g class="result-trace trace-lower">
+            <path class="trace-glow" pathLength="1000" d="M 300 813 C 398 931 579 1008 783 1069 C 1010 1136 1204 1047 1257 941 C 1300 849 1258 758 1179 723" />
+            <path class="trace-core" pathLength="1000" d="M 300 813 C 398 931 579 1008 783 1069 C 1010 1136 1204 1047 1257 941 C 1300 849 1258 758 1179 723" />
+          </g>
+          <circle class="result-spark spark-one" cx="899" cy="184" r="62" fill="url(#result-star-glow)" />
+          <circle class="result-spark spark-two" cx="236" cy="395" r="51" fill="url(#result-star-glow)" />
+          <circle class="result-spark spark-three" cx="429" cy="836" r="54" fill="url(#result-star-glow)" />
+          <circle class="result-spark spark-four" cx="1156" cy="541" r="51" fill="url(#result-star-glow)" />
+        </svg>
+        <img src="assets/figma-skates-result.png?v=20260923-clean4" alt="" />
+      </div>
+
+      <div class="game-card start-card">
+        <h2>Прокатимся?</h2>
+        <p>Попадай на припорошенный лёд<br />и держи ровную траекторию</p>
+        <div class="key-row"><kbd>↑</kbd><kbd>↓</kbd><span>или W / S</span></div>
+        <span class="green-button">Поехали</span>
+      </div>
+
+      <div class="game-card round-card">
+        <div class="result-card-content">
+          <h2 id="roundResult">0 очков</h2>
+          <p>Похоже, снег всё замёл.<br />Попробуем ещё раз?</p>
+          <span class="green-button">Да, поехали</span>
+        </div>
+      </div>
+
+      <div class="game-card final-card">
+        <div class="result-card-content">
+          <h2 id="finalResult">0 очков</h2>
+          <p>Было здорово, а теперь пора<br />возвращаться к бронированию</p>
+          <div class="feedback" role="group" aria-label="Оценить игру">
+            <button class="feedback-button" type="button" aria-label="Понравилось" aria-pressed="false"><img src="assets/like.png" alt="" /></button>
+            <button class="feedback-button feedback-dislike" type="button" aria-label="Не понравилось" aria-pressed="false"><img src="assets/dislike.png" alt="" /></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="start-intro" aria-hidden="true">
+      <div class="intro-card"></div>
+      <div class="intro-title">Прокатимся?</div>
+      <div class="intro-subtitle">Попадай на припорошенный лёд<br />и держи ровную траекторию</div>
+      <div class="intro-controls"><span class="intro-key"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21V4m0 0L8 8m4-4 4 4" /></svg></span><span class="intro-key"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v17m0 0-4-4m4 4 4-4" /></svg></span><span class="intro-or">или W / S</span></div>
+      <div class="intro-button">Поехали</div>
+      <img class="intro-skates" src="assets/figma-intro-skates.png" alt="" />
+    </section>
+
+    <section class="playfield" id="playfield" aria-label="Ледяная дорога. Управляйте стрелками вверх и вниз" tabindex="0">
+      <div class="ice-mask"></div>
+      <canvas id="gameCanvas"></canvas>
+      <div class="snow" id="snow" aria-hidden="true"></div>
+      <div class="hud-live" aria-hidden="true">
+        <span class="route"><b id="clock">00:00</b><em id="distance">До финиша 30 м</em></span>
+        <span><b id="puddlesCount">0</b><em>Льдины</em></span>
+        <span><b id="score">0</b><em>Очки</em></span>
+      </div>
+      <div class="hit-toast" id="toast"><b>+30</b><span>Идеальное скольжение</span></div>
+      <div class="touch-controls"><button id="upBtn" aria-label="Вверх">↑</button><button id="downBtn" aria-label="Вниз">↓</button></div>
+    </section>
+
+    <div class="snow frame-snow" id="frameSnow" aria-hidden="true"></div>
+  </main>
+  <script src="assets/game.js?v=20260924-second-round-ui1"></script>
+</body>
+</html>
