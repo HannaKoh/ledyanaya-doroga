@@ -1,0 +1,240 @@
+*{box-sizing:border-box}:root{--game-radius:clamp(12px,1.62vw,42px)}html,body{margin:0;min-width:320px;background:#eef0f2;font-family:Arial,"Segoe UI",sans-serif}button{font:inherit}.prototype{position:relative;width:100%;max-width:2600px;aspect-ratio:2600/2216;margin:0 auto;overflow:hidden}.screen{display:block;width:100%;height:100%;object-fit:fill;user-select:none;pointer-events:none}.hotspot{display:none;position:absolute;z-index:20;border:0;background:transparent;cursor:pointer}.prototype[data-state="compact"] .teaser-hotspot{display:block;left:2.2%;top:61.3%;width:8%;height:7.2%}.prototype[data-state="start"] .start-hotspot{display:block;left:25.7%;top:83.2%;width:17.8%;height:4.8%}.prototype[data-state="round-end"] .restart-hotspot{display:block;left:25.7%;top:83.1%;width:17.8%;height:4.8%}.prototype[data-state="start"] .close-hotspot,.prototype[data-state="round-end"] .close-hotspot,.prototype[data-state="final"] .close-hotspot{display:block;left:60.55%;top:59.1%;width:3.1%;height:3.3%}.playfield{display:none;position:absolute;z-index:5;left:4.12%;top:57.08%;width:60.96%;height:33.08%;overflow:hidden;border-radius:var(--game-radius);clip-path:inset(0 round var(--game-radius));isolation:isolate;outline:0}.prototype[data-state="playing"] .playfield{display:block}.ice-layer{position:absolute;z-index:0;left:0;right:0;top:14.5%;bottom:0;background:url("ice-field.svg") center/100% 100% no-repeat}.playfield:after{content:"";position:absolute;z-index:1;inset:0;border-radius:inherit;background:linear-gradient(90deg,rgba(24,213,208,.05),rgba(77,111,210,.07));pointer-events:none}canvas{position:absolute;z-index:3;inset:0;width:100%;height:100%;border-radius:inherit}.hud-live{position:absolute;z-index:7;left:3.05%;top:6.25%;display:flex;gap:.8%;height:9.2%;color:#283544;font-size:clamp(8px,1.02vw,26px);font-weight:700}.hud-live>span{display:flex;align-items:center;gap:.7em;white-space:nowrap;padding:0 1em;background:rgba(247,251,254,.96);border-radius:.72em}.hud-live em{font-style:normal;color:#8999ad}.hud-live .route em{min-width:9em}.snow{position:absolute;z-index:8;inset:0;overflow:hidden;pointer-events:none}.snow i{position:absolute;top:-12%;left:var(--x);width:var(--size);height:var(--size);border-radius:50%;background:#fff;opacity:var(--opacity);filter:blur(var(--blur));box-shadow:0 0 calc(var(--size)*1.8) rgba(255,255,255,.55);animation:snowfall var(--duration) linear var(--delay) infinite}@keyframes snowfall{0%{transform:translate3d(0,-10vh,0)}40%{transform:translate3d(var(--sway),42vh,0)}72%{transform:translate3d(var(--mid),80vh,0)}100%{transform:translate3d(var(--drift),120vh,0)}}.frame-snow{display:none;left:4.12%;top:57.08%;width:60.96%;height:33.08%;inset:auto;z-index:12;border-radius:var(--game-radius);clip-path:inset(0 round var(--game-radius));overflow:hidden}.prototype[data-state="start"] .frame-snow,.prototype[data-state="round-end"] .frame-snow,.prototype[data-state="final"] .frame-snow{display:block}.hit-toast{position:absolute;z-index:12;right:3%;bottom:4%;display:flex;align-items:center;gap:1em;padding:.8em 1.25em;border-radius:.75em;background:rgba(245,252,255,.95);font-size:clamp(9px,1.1vw,27px);font-weight:700;opacity:0;transform:translateY(18px);transition:.2s}.hit-toast.show{opacity:1;transform:none}.hit-toast b{color:#00ad46}.touch-controls{display:none}.touch-controls button{width:52px;height:44px;border:0;border-radius:12px;background:rgba(255,255,255,.86);font-size:22px}.hotspot:focus-visible,.playfield:focus-visible{outline:4px solid rgba(0,173,61,.7);outline-offset:-4px}
+@media(max-width:760px){.prototype{min-width:760px}.touch-controls{position:absolute;z-index:14;display:flex;left:2%;right:2%;bottom:2%;justify-content:space-between;pointer-events:none}.touch-controls button{pointer-events:auto}.hud-live{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.snow i{animation-duration:.001ms!important;animation-iteration-count:1!important}.hit-toast{transition:none}}
+
+/* Fully opaque live-game background: hides the skates and puddles baked into the reference PNG. */
+.ice-mask{position:absolute;z-index:2;inset:0;overflow:hidden;background:radial-gradient(ellipse 79% 121% at 100% 0%,rgba(42,81,170,.52),rgba(42,81,170,.27) 47%,transparent 84%),radial-gradient(ellipse 73% 119% at 0% 100%,rgba(0,165,192,.64),rgba(0,165,192,.3) 49%,transparent 87%),url("figma-intro-ice.png") center/100% 100% no-repeat}
+.playfield:after{z-index:3}
+.playfield canvas{z-index:4}
+.prototype[data-state="playing"] .close-hotspot{display:grid;place-items:center;left:60.55%;top:59.1%;width:3.1%;height:3.3%;background:rgba(248,252,255,.88);border:1px solid rgba(125,148,178,.25);border-radius:18%;color:#263646}
+.prototype[data-state="playing"] .close-hotspot:after{content:"×";font-size:clamp(14px,1.8vw,42px);line-height:1}
+
+/* The compact teaser is already rendered exactly in the Figma screen image. */
+.teaser-erasure{display:none;position:absolute;z-index:19;left:1.45%;top:57.53%;width:9.55%;height:10.65%;background:#eceef0;opacity:1;pointer-events:none;transition:opacity .8s ease-in-out}
+.prototype[data-state="compact"][data-teaser-dismissed="true"] .teaser-erasure{display:block}
+.prototype[data-state="compact"][data-teaser-returning="true"] .teaser-erasure{opacity:0}
+.prototype[data-state="compact"][data-teaser-dismissed="true"] .teaser-hotspot{display:none}
+.teaser-snow{display:none;inset:auto;left:1.45%;top:57.53%;width:9.55%;height:10.65%;z-index:18;border-radius:20%;clip-path:inset(0 round 20%);pointer-events:none}
+.prototype[data-state="compact"]:not([data-teaser-dismissed="true"]) .teaser-snow{display:block}
+.prototype[data-field-transition]:not([data-field-transition=""]) .teaser-snow{display:none}
+.teaser-snow i{animation-name:teaser-snowfall}
+@keyframes teaser-snowfall{from{top:-10%;transform:translateX(0)}to{top:110%;transform:translateX(var(--drift))}}
+.teaser-close{display:none;position:absolute;z-index:25;left:1.6%;top:59.99%;width:1.7%;height:1.99%;border:0;border-radius:50%;background:transparent;cursor:pointer;transition:transform .16s}
+.prototype[data-state="compact"]:not([data-teaser-dismissed="true"]) .teaser-close{display:block}
+.teaser-close::before{content:"";position:absolute;left:15.9%;top:15.9%;width:68.2%;height:68.2%;border-radius:50%;background:transparent;transition:background-color .16s}
+.teaser-close:hover::before{background:rgba(255,255,255,.5)}
+.teaser-close:active{transform:scale(.92)}
+.teaser-close:active::before{background:rgba(255,255,255,.7)}
+.teaser-close:focus-visible{outline:3px solid #00b0c7;outline-offset:3px}
+.skate-pair-crop{position:absolute;overflow:hidden;pointer-events:none}
+.skate-pair-crop img{position:absolute;left:0;top:0;width:200%;height:100%;max-width:none;object-fit:fill}
+
+.static-game{display:none;position:absolute;z-index:6;left:4.12%;top:57.08%;width:60.96%;height:33.08%;overflow:hidden;border-radius:var(--game-radius);clip-path:inset(0 round var(--game-radius));isolation:isolate;color:#273442}
+.prototype[data-state="round-end"] .static-game,.prototype[data-state="final"] .static-game{display:block}
+.prototype[data-state="final"] .static-game,.prototype[data-state="final"] .frame-snow{top:64.44%}
+.static-ice-mask{position:absolute;z-index:0;inset:0;overflow:hidden;background:#bde9f2}
+.static-ice-mask img{position:absolute;display:block;width:663.27%;height:302.32%;max-width:none;left:-27.55%;top:-172.58%;pointer-events:none}
+.static-game:after{content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(90deg,rgba(29,219,211,.05),rgba(81,104,208,.08));pointer-events:none}
+.static-close{position:absolute;z-index:7;right:3.1%;top:6.2%;display:grid;place-items:center;width:4.2%;aspect-ratio:1;border-radius:19%;background:rgba(238,247,253,.88);border:1px solid rgba(113,141,176,.28);color:#8093aa;font-size:clamp(14px,1.65vw,40px);line-height:1}
+.static-hud{display:none;position:absolute;z-index:6;left:3.05%;top:6.25%;gap:.8%;height:9.2%;font-size:clamp(8px,1.02vw,26px);font-weight:700}
+.prototype[data-state="round-end"] .static-hud,.prototype[data-state="final"] .static-hud{display:flex}
+.static-hud>span{display:flex;align-items:center;gap:.7em;white-space:nowrap;padding:0 1em;background:rgba(247,251,254,.96);border-radius:.72em}
+.static-hud em{font-style:normal;color:#8999ad}
+.static-hud>span:first-child em{min-width:8.5em}
+.static-skates-start{display:none;z-index:5;left:42%;top:4%;width:16%;aspect-ratio:1.08}
+.prototype[data-state="start"] .static-skates-start{display:block}
+.static-skates-result{display:none;position:absolute;z-index:5;left:41.5%;top:1%;width:17%;height:auto;pointer-events:none}
+.static-skates-result>img{position:relative;z-index:1;display:block;width:100%;height:auto}
+.result-lights{position:absolute;z-index:0;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.result-trace path{fill:none;stroke-linecap:round;stroke-dasharray:155 845;animation:result-light-glide 5.2s linear infinite}
+.result-trace .trace-glow{stroke:#68e9ff;stroke-width:55;opacity:.8;filter:url(#result-light-blur)}
+.result-trace .trace-core{stroke:#f5ffff;stroke-width:13;opacity:.9}
+.trace-left path{animation-delay:-1.7s}
+.trace-lower path{animation-delay:-3.4s}
+.result-spark{opacity:0;transform-box:fill-box;transform-origin:center;animation:result-sparkle 3.8s ease-in-out infinite}
+.spark-two{animation-delay:-1s}.spark-three{animation-delay:-2.3s}.spark-four{animation-delay:-3.1s}
+@keyframes result-light-glide{0%{stroke-dashoffset:0;opacity:0}12%{opacity:.85}82%{opacity:.85}100%{stroke-dashoffset:-1000;opacity:0}}
+@keyframes result-sparkle{0%,100%{opacity:.08;transform:scale(.75)}45%{opacity:.58;transform:scale(1.18)}}
+@media(prefers-reduced-motion:reduce){.result-trace path,.result-spark{animation:none;opacity:0}}
+.prototype[data-state="round-end"] .static-skates-result,.prototype[data-state="final"] .static-skates-result{display:block}
+.game-card{display:none;position:absolute;z-index:4;left:25.5%;top:27.7%;width:49%;height:72.3%;padding:8.4% 10% 3%;border:1px solid rgba(255,255,255,.72);border-radius:3.5% 3.5% 0 0;background:linear-gradient(180deg,rgba(232,248,252,.88),rgba(206,241,244,.92));box-shadow:0 -6px 28px rgba(75,153,190,.08);text-align:center}
+.game-card h2{margin:0 0 3.2%;font-size:clamp(13px,1.65vw,42px);line-height:1.12}
+.game-card p{margin:0;color:#334353;font-size:clamp(10px,1.12vw,29px);line-height:1.28}
+.prototype[data-state="start"] .start-card,.prototype[data-state="round-end"] .round-card,.prototype[data-state="final"] .final-card{display:block}
+.key-row{display:flex;align-items:center;justify-content:center;gap:2.5%;margin:6% 0}
+.key-row kbd{display:grid;place-items:center;width:12%;aspect-ratio:1;border-radius:22%;background:rgba(255,255,255,.82);box-shadow:0 1px 0 rgba(51,74,96,.08);font-family:inherit;font-size:clamp(12px,1.45vw,36px)}
+.key-row span{margin-left:3%;font-size:clamp(9px,1.05vw,27px)}
+.green-button{display:grid;place-items:center;width:78%;height:22%;margin:0 auto;border-radius:10px;background:#00a83b;color:#fff;font-size:clamp(10px,1.12vw,29px);font-weight:700}
+.round-card,.final-card{top:31%;height:69%;padding-top:10.5%}
+.round-card .green-button{height:25%;margin-top:7%}
+.feedback{display:flex;justify-content:center;gap:5%;margin-top:7%}
+.feedback span{display:grid;place-items:center;width:14%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.72);font-size:clamp(10px,1.25vw,31px)}
+
+/* Opening choreography stays in place after it finishes. There is no late
+   replacement with the flattened Figma screenshot. */
+.frame-snow{inset:auto;left:4.12%;top:57.08%}
+.start-intro{display:none;position:absolute;z-index:8;left:4.12%;top:57.08%;width:60.96%;height:33.08%;overflow:hidden;isolation:isolate;border-radius:var(--game-radius);clip-path:inset(0 round var(--game-radius));background:#c7e9f5 url("figma-intro-ice.png") center/100% 100% no-repeat;pointer-events:none;color:#253749}
+.prototype[data-state="start"] .start-intro{display:block}
+.start-intro::before{content:"";position:absolute;z-index:0;inset:0;background:radial-gradient(ellipse 79% 121% at 100% 0%,rgba(42,81,170,.52),rgba(42,81,170,.27) 47%,transparent 84%),radial-gradient(ellipse 73% 119% at 0% 100%,rgba(0,165,192,.64),rgba(0,165,192,.3) 49%,transparent 87%);pointer-events:none}
+.start-intro>div,.start-intro>img{position:absolute}
+.intro-card{z-index:1;left:25.5%;top:27.7%;width:49%;height:72.3%;border-radius:4% 4% 0 0;border:1px solid rgba(255,255,255,.8);background:linear-gradient(180deg,rgba(250,254,255,.67),rgba(223,250,253,.5));box-shadow:0 -10px 48px rgba(181,237,250,.53),inset 0 1px rgba(255,255,255,.8);backdrop-filter:blur(3px);animation:intro-card-in .86s cubic-bezier(.18,.78,.22,1) both}
+.intro-title,.intro-subtitle,.intro-controls,.intro-button{z-index:3;left:25.5%;width:49%;text-align:center;opacity:0;animation:intro-item-in .7s cubic-bezier(.17,.8,.23,1) both}
+.intro-title{top:43%;font-size:min(1.62vw,42px);font-weight:700;letter-spacing:-.025em;line-height:1.14;animation-delay:.46s}
+.intro-subtitle{top:52%;font-size:min(1.17vw,30px);line-height:1.33;animation-delay:.64s}
+.intro-controls{top:67.1%;display:flex;align-items:center;justify-content:center;gap:1.8%;height:8.2%;animation-delay:.84s}
+.intro-key{display:grid;place-items:center;width:8.8%;height:100%;border-radius:25%;background:#fff;box-shadow:0 2px 7px rgba(82,120,145,.1)}
+.intro-key svg{display:block;width:45%;height:57%;stroke:#27323c;stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round}
+.intro-or{margin-left:1.8%;font-size:min(1.06vw,28px)}
+.intro-button{z-index:3;left:35.7%;top:80%;width:28.6%;height:10.7%;display:grid;place-items:center;border-radius:clamp(7px,.48vw,13px);background:#009b33;color:#fff;font-size:min(1.12vw,29px);font-weight:700;box-shadow:0 5px 12px rgba(0,120,52,.11);animation-delay:1.08s}
+.intro-button{transition:background-color .18s ease}
+.prototype[data-state="start"] .start-hotspot:hover~.start-intro .intro-button,.prototype[data-state="start"] .start-hotspot:focus-visible~.start-intro .intro-button{background:#008b2e}
+.prototype[data-state="start"] .start-hotspot:active~.start-intro .intro-button{background:#007c29}
+.intro-skates{z-index:4;left:42.6%;top:6.7%;width:14.9%;height:auto;filter:drop-shadow(0 5px 5px rgba(29,75,167,.24)) drop-shadow(0 10px 14px rgba(48,170,229,.18));opacity:0;animation:intro-skates-in 1.05s cubic-bezier(.16,.78,.21,1) 1.36s both}
+.prototype[data-state="start"] .close-hotspot{left:60.77%;top:59.3%;width:2.45%;height:2.9%;background:rgba(232,242,252,.91);border:1px solid rgba(255,255,255,.7);border-radius:22%;color:#778ba2;display:grid;place-items:center;font-size:min(1.62vw,42px);line-height:1}
+.prototype[data-state="start"] .close-hotspot::after{content:"×";transform:translateY(-3%)}
+.prototype[data-state="start"] .close-hotspot:hover{background:#fff;color:#526b83}
+.prototype[data-state="start"][data-closing="true"] .close-hotspot{pointer-events:none}
+.prototype[data-state="start"][data-closing="true"][data-exit-target="compact"] .close-hotspot{animation:intro-close-out .3s ease both}
+.prototype[data-state="start"][data-closing="true"] .start-hotspot{pointer-events:none}
+.prototype[data-state="start"][data-closing="true"] .intro-skates{animation:intro-skates-out 1.05s cubic-bezier(.16,.78,.21,1) 0s both}
+.prototype[data-state="start"][data-closing="true"] .intro-button{animation:intro-item-out .7s cubic-bezier(.17,.8,.23,1) .63s both}
+.prototype[data-state="start"][data-closing="true"] .intro-controls{animation:intro-item-out .7s cubic-bezier(.17,.8,.23,1) .87s both}
+.prototype[data-state="start"][data-closing="true"] .intro-subtitle{animation:intro-item-out .7s cubic-bezier(.17,.8,.23,1) 1.07s both}
+.prototype[data-state="start"][data-closing="true"] .intro-title{animation:intro-item-out .7s cubic-bezier(.17,.8,.23,1) 1.25s both}
+.prototype[data-state="start"][data-closing="true"] .intro-card{animation:intro-card-out .86s cubic-bezier(.18,.78,.22,1) 1.55s both}
+@keyframes intro-card-in{from{transform:translateY(120%);opacity:0}70%{opacity:1}to{transform:translateY(0);opacity:1}}
+@keyframes intro-item-in{from{transform:translateY(135%);opacity:0;filter:blur(4px)}to{transform:translateY(0);opacity:1;filter:blur(0)}}
+@keyframes intro-skates-in{0%{transform:translateY(-160%) rotate(-7deg);opacity:0}64%{opacity:1}82%{transform:translateY(4%) rotate(1deg)}100%{transform:translateY(0) rotate(0);opacity:1}}
+@keyframes intro-card-out{from{transform:translateY(0);opacity:1}30%{opacity:1}to{transform:translateY(120%);opacity:0}}
+@keyframes intro-item-out{from{transform:translateY(0);opacity:1;filter:blur(0)}to{transform:translateY(135%);opacity:0;filter:blur(4px)}}
+@keyframes intro-skates-out{0%{transform:translateY(0) rotate(0);opacity:1}18%{transform:translateY(4%) rotate(1deg)}36%{opacity:1}100%{transform:translateY(-160%) rotate(-7deg);opacity:0}}
+@keyframes intro-close-out{to{opacity:0;transform:translateY(-30%)}}
+@media(prefers-reduced-motion:reduce){.prototype[data-state="start"] .start-intro{display:none}}
+
+/* The ice field grows out of the exact teaser footprint and folds back into it. */
+.prototype{container-type:inline-size}
+.field-transition{display:none;position:absolute;z-index:26;left:4.12%;top:57.08%;width:60.96%;height:33.08%;overflow:hidden;border-radius:var(--game-radius);clip-path:inset(0 round var(--game-radius));pointer-events:none;isolation:isolate}
+.field-transition-teaser,.field-transition-ice{position:absolute;inset:0}
+.field-transition-teaser{background:url("ui-compact.png") -1.45cqw -49.03cqw/100cqw 85.23cqw no-repeat}
+.field-transition-ice{background:radial-gradient(ellipse 79% 121% at 100% 0%,rgba(42,81,170,.52),rgba(42,81,170,.27) 47%,transparent 84%),radial-gradient(ellipse 73% 119% at 0% 100%,rgba(0,165,192,.64),rgba(0,165,192,.3) 49%,transparent 87%),url("figma-intro-ice.png") center/100% 100% no-repeat}
+.prototype[data-field-transition="opening"] .field-transition{display:block;animation:field-grow .8s cubic-bezier(.2,.8,.2,1) both}
+.prototype[data-field-transition="opening"] .field-transition-teaser{animation:field-teaser-out .48s ease both}
+.prototype[data-field-transition="opening"] .field-transition-ice{animation:field-ice-in .48s ease both}
+.prototype[data-field-transition="reveal"] .field-transition{display:block;animation:field-overlay-out .24s ease both}
+.prototype[data-field-transition="reveal"] .field-transition-teaser{opacity:0}
+.prototype[data-field-transition="closing"] .field-transition{display:block;animation:field-shrink .8s cubic-bezier(.2,.8,.2,1) both}
+.prototype[data-field-transition="closing"] .field-transition-teaser{animation:field-teaser-in .3s ease .5s both}
+.prototype[data-field-transition="closing"] .field-transition-ice{animation:field-ice-out .3s ease .5s both}
+.prototype[data-field-transition="opening"] .teaser-erasure,.prototype[data-field-transition="closing"] .teaser-erasure,.prototype[data-field-transition="playing-close"] .teaser-erasure,.prototype[data-field-transition="round-close"] .teaser-erasure{display:block}
+.prototype[data-field-transition="opening"] .teaser-hotspot,.prototype[data-field-transition="opening"] .teaser-close,.prototype[data-field-transition="playing-close"] .close-hotspot,.prototype[data-field-transition="round-close"] .close-hotspot{display:none}
+.prototype[data-field-transition="playing-close"] .playfield,.prototype[data-field-transition="round-close"] .static-game{z-index:21;animation:field-shrink .8s cubic-bezier(.2,.8,.2,1) both}
+.prototype[data-field-transition="playing-close"] .hud-live,.prototype[data-field-transition="round-close"] .static-hud,.prototype[data-field-transition="round-close"] .frame-snow{animation:field-overlay-out .3s ease both}
+@keyframes field-grow{from{left:1.45%;top:57.53%;width:9.55%;height:10.65%;border-radius:20%}to{left:4.12%;top:57.08%;width:60.96%;height:33.08%;border-radius:var(--game-radius)}}
+@keyframes field-shrink{from{left:4.12%;top:57.08%;width:60.96%;height:33.08%;border-radius:var(--game-radius)}to{left:1.45%;top:57.53%;width:9.55%;height:10.65%;border-radius:20%}}
+@keyframes field-teaser-out{from{opacity:1}to{opacity:0}}
+@keyframes field-ice-in{from{opacity:0}to{opacity:1}}
+@keyframes field-teaser-in{from{opacity:0}to{opacity:1}}
+@keyframes field-ice-out{from{opacity:1}to{opacity:0}}
+@keyframes field-overlay-out{to{opacity:0}}
+@media(prefers-reduced-motion:reduce){.field-transition{display:none!important}.prototype[data-field-transition="playing-close"] .playfield,.prototype[data-field-transition="round-close"] .static-game{animation:none}}
+
+/* Game entry: the HUD glides in first; the skates enter from the left in canvas. */
+.prototype[data-state="playing"] .hud-live>span{animation:hud-chip-in .64s cubic-bezier(.18,.82,.25,1) both}
+.prototype[data-state="playing"] .hud-live>span:nth-child(2){animation-delay:.14s}
+.prototype[data-state="playing"] .hud-live>span:nth-child(3){animation-delay:.28s}
+@keyframes hud-chip-in{from{opacity:0;transform:translateY(-200%)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.prototype[data-state="playing"] .hud-live>span{animation:none}}
+
+/* One frosted-white surface for the opening card, live HUD and close controls. */
+:root{--game-glass:linear-gradient(180deg,rgba(250,254,255,.67),rgba(223,250,253,.5));--game-glass-border:rgba(255,255,255,.8);--game-primary:#27323c;--game-secondary:#64758c}
+.intro-card{background:var(--game-glass);border-color:var(--game-glass-border)}
+.game-card,.hit-toast{background:var(--game-glass);border:1px solid var(--game-glass-border);backdrop-filter:blur(3px)}
+@font-face{font-family:"SB Sans Text";src:url("SBSansText-Medium.woff2") format("woff2");font-style:normal;font-weight:500;font-display:swap}
+.hud-live,.static-hud{width:max-content;max-width:94%;height:8.73%;gap:min(.615vw,16px);font-family:"SB Sans Text",Arial,sans-serif;font-size:min(1.077vw,28px);font-weight:500;line-height:1.2857;letter-spacing:-.02em;color:#262626}
+.hud-live>span,.static-hud>span{flex:0 0 auto;width:max-content;justify-content:center;gap:.57em;padding:0 .86em;border:1px solid var(--game-glass-border);border-radius:.72em;background:var(--game-glass);backdrop-filter:blur(3px)}
+.hud-live b,.static-hud b{font-weight:500}
+.hud-live em,.static-hud em{min-width:0!important;color:#738295;font-weight:500}
+.static-hud>span,.static-close,.prototype[data-state="start"] .close-hotspot,.prototype[data-state="playing"] .close-hotspot{background:var(--game-glass);border:1px solid var(--game-glass-border);backdrop-filter:blur(3px);color:var(--game-primary)}
+.static-hud>span{color:#262626}
+.static-close{color:#778ba2}
+.prototype[data-state="start"] .close-hotspot,.prototype[data-state="playing"] .close-hotspot{left:60.77%;top:59.3%;width:2.45%;height:2.9%;display:grid;place-items:center;border-radius:22%;color:#778ba2;font-size:min(1.62vw,42px);line-height:1}
+.prototype[data-state="start"] .close-hotspot::after,.prototype[data-state="playing"] .close-hotspot::after{content:"×";font-size:inherit;transform:translateY(-3%)}
+.prototype[data-state="playing"] .close-hotspot:hover{background:rgba(255,255,255,.82);color:#526b83}
+.hit-toast{right:3.03%;bottom:4.36%;height:8.73%;width:max-content;gap:min(.615vw,16px);padding:0 min(.615vw,16px);border:1px solid var(--game-glass-border);border-radius:min(.615vw,16px);background:var(--game-glass);backdrop-filter:blur(3px);font-family:"SB Sans Text",Arial,sans-serif;font-size:clamp(9px,1.077vw,28px);font-weight:500;line-height:1.2857;letter-spacing:-.02em;color:#262626;white-space:nowrap}
+.hit-toast b{font-weight:500;color:#03b545}
+
+/* Keep the last playable frame and its live counters visible under the result. */
+.prototype[data-state="round-end"] .playfield{display:block;background:#c7e9f5}
+.prototype[data-state="round-end"] .static-game{background:transparent}
+.prototype[data-state="round-end"] .static-ice-mask,.prototype[data-state="round-end"] .static-game::after,.prototype[data-state="round-end"] .static-close,.prototype[data-state="round-end"] .static-hud,.prototype[data-state="round-end"] .frame-snow{display:none}
+.prototype[data-state="round-end"] .round-card{top:41.8%;height:58.2%;padding:0;border-radius:4% 4% 0 0;background:var(--game-glass);border-color:var(--game-glass-border);backdrop-filter:blur(3px);font-family:"SB Sans Text",Arial,sans-serif;color:var(--game-primary);animation:intro-card-in .86s cubic-bezier(.18,.78,.22,1) both}
+.round-card h2,.round-card p,.round-card .green-button{position:absolute;left:0;width:100%;margin:0;text-align:center;font-family:"SB Sans Text",Arial,sans-serif;font-weight:500;opacity:0;animation:intro-item-in .7s cubic-bezier(.17,.8,.23,1) both}
+.round-card h2{top:23.5%;font-size:min(1.62vw,42px);line-height:1.14;letter-spacing:-.025em;animation-delay:.46s}
+.round-card p{top:40.5%;font-size:min(1.17vw,30px);line-height:1.33;color:#334353;animation-delay:.68s}
+.round-card .green-button{left:20.8%;top:72%;width:58.4%;height:18.7%;display:grid;place-items:center;border-radius:clamp(7px,.48vw,13px);background:#009b33;color:#fff;font-size:min(1.12vw,29px);line-height:1;font-weight:500;box-shadow:0 5px 12px rgba(0,120,52,.11);animation-delay:.9s;transition:background-color .18s ease}
+.prototype[data-state="round-end"] .restart-hotspot{top:84.35%}
+.prototype[data-state="round-end"] .restart-hotspot:hover~.static-game .round-card .green-button,.prototype[data-state="round-end"] .restart-hotspot:focus-visible~.static-game .round-card .green-button{background:#008b2e}
+.prototype[data-state="round-end"] .restart-hotspot:active~.static-game .round-card .green-button{background:#007c29}
+.prototype[data-state="round-end"] .static-skates-result{left:41.9%;top:18.2%;width:16%;filter:drop-shadow(0 5px 5px rgba(29,75,167,.24)) drop-shadow(0 10px 14px rgba(48,170,229,.18));animation:intro-skates-in 1.05s cubic-bezier(.16,.78,.21,1) 1.18s both}
+.prototype[data-state="round-end"] .close-hotspot{left:60.77%;top:59.3%;width:2.45%;height:2.9%;display:grid;place-items:center;border:1px solid var(--game-glass-border);border-radius:22%;background:var(--game-glass);backdrop-filter:blur(3px);color:#778ba2;font-size:min(1.62vw,42px);line-height:1}
+.prototype[data-state="round-end"] .close-hotspot::after{content:"×";font-size:inherit;transform:translateY(-3%)}
+.prototype[data-state="round-end"] .close-hotspot:hover{background:rgba(255,255,255,.82);color:#526b83}
+.prototype[data-field-transition="round-close"] .close-hotspot{display:none}
+.prototype[data-field-transition="round-close"] .playfield{z-index:20;animation:field-shrink .8s cubic-bezier(.2,.8,.2,1) both}
+/* Close active stages in two beats: clear the skates and UI, then fold the ice into the teaser. */
+@keyframes active-skates-out{to{opacity:0;transform:translateX(-36%)}}
+@keyframes active-ice-out{to{opacity:0}}
+@keyframes active-hud-out{to{opacity:0;transform:translateY(-160%)}}
+.prototype[data-field-transition="playing-elements-out"] .close-hotspot,.prototype[data-field-transition="round-elements-out"] .close-hotspot,.prototype[data-field-transition="round-elements-out"] .restart-hotspot{display:none}
+.prototype[data-field-transition="playing-elements-out"] #gameCanvas{animation:active-ice-out .85s ease .1s both}
+.prototype[data-field-transition="playing-elements-out"] .closing-skates{animation:active-skates-out .75s cubic-bezier(.35,.05,.75,.45) both}
+.prototype[data-field-transition="playing-elements-out"] .playfield .snow{animation:field-overlay-out .55s ease .25s both}
+.prototype[data-field-transition="playing-elements-out"] .hud-live>span,.prototype[data-field-transition="round-elements-out"] .hud-live>span{animation:active-hud-out .48s cubic-bezier(.35,.05,.75,.45) both}
+.prototype[data-field-transition="playing-elements-out"] .hud-live>span:nth-child(2),.prototype[data-field-transition="round-elements-out"] .hud-live>span:nth-child(2){animation-delay:.07s}
+.prototype[data-field-transition="playing-elements-out"] .hud-live>span:nth-child(3),.prototype[data-field-transition="round-elements-out"] .hud-live>span:nth-child(3){animation-delay:.14s}
+.prototype[data-field-transition="playing-close"] .playfield canvas,.prototype[data-field-transition="playing-close"] .hud-live,.prototype[data-field-transition="round-close"] .hud-live{opacity:0}
+.prototype[data-field-transition="round-elements-out"] .static-skates-result{animation:intro-skates-out .75s cubic-bezier(.16,.78,.21,1) both}
+.prototype[data-field-transition="round-elements-out"] .round-card .green-button{animation:intro-item-out .55s cubic-bezier(.17,.8,.23,1) .13s both}
+.prototype[data-field-transition="round-elements-out"] .round-card p{animation:intro-item-out .55s cubic-bezier(.17,.8,.23,1) .23s both}
+.prototype[data-field-transition="round-elements-out"] .round-card h2{animation:intro-item-out .55s cubic-bezier(.17,.8,.23,1) .33s both}
+.prototype[data-field-transition="round-elements-out"] .round-card{animation:intro-card-out .7s cubic-bezier(.18,.78,.22,1) .35s both}
+.prototype[data-field-transition="round-close"] .static-game{display:none}
+.prototype[data-field-transition="round-close"] .playfield{z-index:21}
+@media(prefers-reduced-motion:reduce){.prototype[data-state="round-end"] .round-card,.round-card h2,.round-card p,.round-card .green-button,.prototype[data-state="round-end"] .static-skates-result{animation:none;opacity:1}}
+
+/* Final result uses the same entrance as the round result, at its later booking step. */
+.prototype[data-state="final"] .playfield{display:block;top:64.44%;background:#c7e9f5}
+.prototype[data-state="final"] .static-game{background:transparent}
+.prototype[data-state="final"] .static-ice-mask,.prototype[data-state="final"] .static-game::after,.prototype[data-state="final"] .static-close,.prototype[data-state="final"] .static-hud,.prototype[data-state="final"] .frame-snow{display:none}
+.prototype[data-state="final"] .final-card{top:41.8%;height:58.2%;padding:0;border-radius:4% 4% 0 0;background:var(--game-glass);border-color:var(--game-glass-border);backdrop-filter:blur(3px);font-family:"SB Sans Text",Arial,sans-serif;color:var(--game-primary);animation:intro-card-in .86s cubic-bezier(.18,.78,.22,1) both}
+.final-card h2,.final-card p,.final-card .feedback{position:absolute;left:0;width:100%;margin:0;text-align:center;font-family:"SB Sans Text",Arial,sans-serif;font-weight:500;opacity:0;animation:intro-item-in .7s cubic-bezier(.17,.8,.23,1) both}
+.final-card h2{top:22%;font-size:min(1.62vw,42px);line-height:1.14;letter-spacing:-.025em;animation-delay:.46s}
+.final-card p{top:40%;font-size:min(1.17vw,30px);line-height:1.33;color:#334353;animation-delay:.68s}
+.final-card .feedback{top:70%;height:15.3%;display:flex;align-items:center;justify-content:center;gap:2.5%;animation-delay:.9s}
+.feedback-button{display:grid;place-items:center;width:10.3%;aspect-ratio:1;padding:0;border:2px solid rgba(255,255,255,.96);border-radius:25%;background:rgba(255,255,255,.52);cursor:pointer;box-shadow:none;transition:background-color .18s ease,transform .18s ease}
+.feedback-button img{display:block;width:52%;height:52%;object-fit:contain}
+.feedback-button:hover{background:rgba(255,255,255,.76);transform:translateY(-2px)}
+.feedback-button:active{transform:translateY(0) scale(.94)}
+.feedback-button[aria-pressed="true"]{background:#fff;border-color:#fff}
+.feedback-button[aria-pressed="true"] img{filter:brightness(0);opacity:.87}
+.feedback-button:focus-visible{outline:2px solid #009b33;outline-offset:2px}
+.prototype[data-state="final"] .static-skates-result{left:41.9%;top:18.2%;width:16%;filter:drop-shadow(0 5px 5px rgba(29,75,167,.24)) drop-shadow(0 10px 14px rgba(48,170,229,.18));animation:intro-skates-in 1.05s cubic-bezier(.16,.78,.21,1) 1.18s both}
+.prototype[data-state="final"] .close-hotspot{left:60.77%;top:66.66%;width:2.45%;height:2.9%;display:grid;place-items:center;border:1px solid var(--game-glass-border);border-radius:22%;background:var(--game-glass);backdrop-filter:blur(3px);color:#778ba2;font-size:min(1.62vw,42px);line-height:1}
+.prototype[data-state="final"] .close-hotspot::after{content:"×";font-size:inherit;transform:translateY(-3%)}
+.prototype[data-state="final"] .close-hotspot:hover{background:rgba(255,255,255,.82);color:#526b83}
+.final-erasure{display:none;position:absolute;z-index:4;left:4.12%;top:64.44%;width:60.96%;height:33.6%;background:#eceef0;pointer-events:none}
+.prototype[data-state="booking"] .final-erasure,.prototype[data-field-transition="final-close"] .final-erasure{display:block}
+.prototype[data-field-transition="final-close"] .close-hotspot{display:none}
+.prototype[data-field-transition="final-close"] .playfield,.prototype[data-field-transition="final-close"] .static-game{animation:final-field-out .65s cubic-bezier(.2,.8,.2,1) both}
+@keyframes final-field-out{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(2%) scale(.98)}}
+@media(prefers-reduced-motion:reduce){.prototype[data-state="final"] .final-card,.final-card h2,.final-card p,.final-card .feedback,.prototype[data-state="final"] .static-skates-result{animation:none;opacity:1}.prototype[data-field-transition="final-close"] .playfield,.prototype[data-field-transition="final-close"] .static-game{animation:none}}
+
+/* The frosted cards continue below the clipped game field; no bottom border may show. */
+.intro-card{height:calc(72.3% + 12px);border-bottom:0}
+.prototype[data-state="round-end"] .round-card,.prototype[data-state="final"] .final-card{height:calc(58.2% + 12px);border-bottom:0}
+.result-card-content{position:absolute;z-index:4;inset:0 0 12px}
+
+/* The reference PNGs contain two baked white pixels below the game viewport. */
+.game-bottom-cleanup{display:none;position:absolute;z-index:4;left:4.12%;top:90.16%;width:60.96%;height:12px;background:#eceef0;pointer-events:none}
+.prototype[data-state="start"] .game-bottom-cleanup,.prototype[data-state="playing"] .game-bottom-cleanup,.prototype[data-state="round-end"] .game-bottom-cleanup,.prototype[data-state="final"] .game-bottom-cleanup{display:block}
+.prototype[data-state="final"] .game-bottom-cleanup{top:97.52%}
