@@ -5,18 +5,29 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Бронирование № 123456 — Домклик</title>
   <meta name="description" content="Новогодняя мини-игра на экране ожидания Домклик" />
-  <link rel="stylesheet" href="assets/styles.css?v=20260924-second-round-ui1" />
+  <link rel="stylesheet" href="assets/styles.css?v=20260926-final-backdrop1" />
 </head>
 <body>
   <main class="prototype" id="prototype" data-state="compact">
     <img class="screen" id="screen" src="assets/ui-compact.png" alt="Экран бронирования Домклик" />
     <div class="game-bottom-cleanup" aria-hidden="true"></div>
     <div class="final-erasure" aria-hidden="true"></div>
+    <div class="game-modal-overlay" aria-hidden="true"></div>
 
-    <button class="hotspot teaser-hotspot" id="teaserBtn" aria-label="Открыть игру"></button>
-    <div class="snow teaser-snow" aria-hidden="true"></div>
     <div class="teaser-erasure" aria-hidden="true"></div>
-    <button class="teaser-close" id="teaserCloseBtn" type="button" aria-label="Закрыть баннер «Скоротать время»"></button>
+    <div class="teaser-art" aria-hidden="true">
+      <span class="teaser-dot teaser-dot-small"></span>
+      <span class="teaser-dot teaser-dot-large"></span>
+      <span class="teaser-card-wrap">
+        <img class="teaser-card" src="assets/teaser-new.png" alt="" />
+        <img class="teaser-clean-patch" src="assets/teaser-bg-clean.png" alt="" />
+        <img class="teaser-skate" src="assets/teaser-skate.png" alt="" />
+        <span class="teaser-spark teaser-spark-one"></span>
+        <span class="teaser-spark teaser-spark-two"></span>
+      </span>
+    </div>
+    <div class="snow teaser-snow" aria-hidden="true"></div>
+    <button class="hotspot teaser-hotspot" id="teaserBtn" aria-label="Открыть игру"></button>
     <div class="field-transition" aria-hidden="true"><div class="field-transition-teaser"></div><div class="field-transition-ice"></div></div>
     <button class="hotspot start-hotspot" id="startBtn" aria-label="Начать игру"></button>
     <button class="hotspot restart-hotspot" id="restartBtn" aria-label="Сыграть ещё раз"></button>
@@ -27,9 +38,10 @@
       <span class="static-close">×</span>
 
       <div class="static-hud">
-        <span><b id="resultClock">00:00</b><em>До финиша 0 м</em></span>
-        <span><b id="resultPuddles">0</b><em>Льдин</em></span>
-        <span><b id="resultScore">0</b><em>Очков</em></span>
+        <span><b id="resultClock">00:00</b></span>
+        <span><em>До финиша:</em><b id="resultDistance">0 м</b></span>
+        <span><em>Льдины:</em><b id="resultPuddles">0</b></span>
+        <span><em>Очки:</em><b id="resultScore">0</b></span>
       </div>
 
       <div class="static-skates-start skate-pair-crop"><img src="assets/figma-skates-pairs.png?v=20260923-clean4" alt="" /></div>
@@ -100,9 +112,10 @@
       <canvas id="gameCanvas"></canvas>
       <div class="snow" id="snow" aria-hidden="true"></div>
       <div class="hud-live" aria-hidden="true">
-        <span class="route"><b id="clock">00:00</b><em id="distance">До финиша 30 м</em></span>
-        <span><b id="puddlesCount">0</b><em>Льдины</em></span>
-        <span><b id="score">0</b><em>Очки</em></span>
+        <span class="timer"><b id="clock">00:00</b></span>
+        <span class="route"><em>До финиша:</em><b id="distance">30 м</b></span>
+        <span><em>Льдины:</em><b id="puddlesCount">0</b></span>
+        <span><em>Очки:</em><b id="score">0</b></span>
       </div>
       <div class="hit-toast" id="toast"><b>+30</b><span>Идеальное скольжение</span></div>
       <div class="touch-controls"><button id="upBtn" aria-label="Вверх">↑</button><button id="downBtn" aria-label="Вниз">↓</button></div>
@@ -110,6 +123,6 @@
 
     <div class="snow frame-snow" id="frameSnow" aria-hidden="true"></div>
   </main>
-  <script src="assets/game.js?v=20260924-second-round-ui1"></script>
+  <script src="assets/game.js?v=20260926-final-backdrop1"></script>
 </body>
 </html>
