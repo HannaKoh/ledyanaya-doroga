@@ -9,23 +9,40 @@
 .prototype[data-state="playing"] .close-hotspot{display:grid;place-items:center;left:60.55%;top:59.1%;width:3.1%;height:3.3%;background:rgba(248,252,255,.88);border:1px solid rgba(125,148,178,.25);border-radius:18%;color:#263646}
 .prototype[data-state="playing"] .close-hotspot:after{content:"×";font-size:clamp(14px,1.8vw,42px);line-height:1}
 
-/* The compact teaser is already rendered exactly in the Figma screen image. */
-.teaser-erasure{display:none;position:absolute;z-index:19;left:1.45%;top:57.53%;width:9.55%;height:10.65%;background:#eceef0;opacity:1;pointer-events:none;transition:opacity .8s ease-in-out}
-.prototype[data-state="compact"][data-teaser-dismissed="true"] .teaser-erasure{display:block}
-.prototype[data-state="compact"][data-teaser-returning="true"] .teaser-erasure{opacity:0}
-.prototype[data-state="compact"][data-teaser-dismissed="true"] .teaser-hotspot{display:none}
-.teaser-snow{display:none;inset:auto;left:1.45%;top:57.53%;width:9.55%;height:10.65%;z-index:18;border-radius:20%;clip-path:inset(0 round 20%);pointer-events:none}
-.prototype[data-state="compact"]:not([data-teaser-dismissed="true"]) .teaser-snow{display:block}
+/* The original teaser is baked into the booking screenshot. Cover only that
+   neutral page area; the new Figma teaser is a separate, animated asset. */
+.teaser-erasure{display:none;position:absolute;z-index:19;left:1.45%;top:57.53%;width:9.55%;height:10.65%;background:#eceef0;pointer-events:none}
+.prototype[data-state="compact"] .teaser-erasure,.prototype[data-field-transition="opening"] .teaser-erasure,.prototype[data-field-transition="closing"] .teaser-erasure,.prototype[data-field-transition="playing-close"] .teaser-erasure,.prototype[data-field-transition="round-close"] .teaser-erasure{display:block}
+.teaser-art{display:none;position:absolute;z-index:20;inset:0;pointer-events:none}
+.prototype[data-state="compact"][data-teaser-dismissed="false"] .teaser-art{display:block}
+.teaser-card-wrap{position:absolute;display:block;left:53.1%;top:34.75%;width:9.385%;height:4.332%;overflow:hidden;border-radius:10% / 25%;opacity:1}
+.teaser-card{position:absolute;display:block;inset:0;width:100%;height:100%;object-fit:fill}
+.teaser-clean-patch{position:absolute;display:block;inset:0;width:100%;height:100%;object-fit:fill;mask-image:linear-gradient(90deg,transparent 60%,#000 65%)}
+.teaser-skate{position:absolute;display:block;left:65.8%;top:8.9%;width:29.5%;height:75.5%;object-fit:fill;transform-origin:78% 80%;animation:teaser-skate-glide 3.6s linear 1.45s infinite}
+.teaser-spark{position:absolute;display:block;width:3.6%;aspect-ratio:1;background:#b5f7ff;clip-path:polygon(50% 0,62% 37%,100% 50%,62% 63%,50% 100%,38% 63%,0 50%,38% 37%);filter:drop-shadow(0 0 3px #7ceaff);opacity:0;animation:teaser-sparkle 3.6s linear 1.45s infinite}
+.teaser-spark-one{left:88%;top:61%}
+.teaser-spark-two{left:79%;top:76%;width:2.4%;animation-delay:1.57s}
+@keyframes teaser-skate-glide{0%,8%,43%,100%{transform:translate(0,0) rotate(0) scale(1)}18%{transform:translate(0,5%) rotate(13deg) scale(1.035)}24%{transform:translate(0,7%) rotate(16deg) scale(1.035)}33%{transform:translate(0,-2%) rotate(-3deg) scale(1.01)}}
+@keyframes teaser-sparkle{0%,12%,30%,100%{opacity:0;transform:scale(.4)}18%{opacity:1;transform:scale(1.25)}24%{opacity:.65;transform:scale(.75)}}
+.teaser-dot{position:absolute;display:block;border-radius:50%;background:radial-gradient(circle at 35% 30%,#00657b 0%,#073c4b 55%,#171717 100%);box-shadow:0 0 .22cqw rgba(0,176,199,.25);opacity:1}
+.teaser-dot-large{left:52.68%;top:39.6%;width:1.077%;aspect-ratio:1}
+.teaser-dot-small{left:51.8%;top:40.95%;width:.615%;aspect-ratio:1}
+.prototype[data-teaser-returning="true"] .teaser-dot-small{animation:teaser-dot-in .46s cubic-bezier(.16,.8,.3,1) both}
+.prototype[data-teaser-returning="true"] .teaser-dot-large{animation:teaser-dot-in .54s cubic-bezier(.16,.8,.3,1) .28s both}
+.prototype[data-teaser-returning="true"] .teaser-card-wrap{animation:teaser-card-in .78s cubic-bezier(.18,.82,.25,1) .63s both;transform-origin:0 100%}
+@keyframes teaser-dot-in{from{opacity:0;transform:scale(.15);filter:blur(3px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+@keyframes teaser-card-in{from{opacity:0;transform:translate(-9%,15%) scale(.16,.28);filter:blur(5px)}55%{opacity:1}to{opacity:1;transform:translate(0) scale(1);filter:blur(0)}}
+.teaser-snow{display:none;inset:auto;left:53.1%;top:34.75%;width:9.385%;height:4.332%;z-index:21;border-radius:10% / 25%;clip-path:inset(0 round 10% / 25%);pointer-events:none}
+.prototype[data-state="compact"][data-teaser-dismissed="false"] .teaser-snow{display:block;animation:teaser-snow-in .4s ease 1.2s both}
 .prototype[data-field-transition]:not([data-field-transition=""]) .teaser-snow{display:none}
 .teaser-snow i{animation-name:teaser-snowfall}
+@keyframes teaser-snow-in{from{opacity:0}to{opacity:1}}
 @keyframes teaser-snowfall{from{top:-10%;transform:translateX(0)}to{top:110%;transform:translateX(var(--drift))}}
-.teaser-close{display:none;position:absolute;z-index:25;left:1.6%;top:59.99%;width:1.7%;height:1.99%;border:0;border-radius:50%;background:transparent;cursor:pointer;transition:transform .16s}
-.prototype[data-state="compact"]:not([data-teaser-dismissed="true"]) .teaser-close{display:block}
-.teaser-close::before{content:"";position:absolute;left:15.9%;top:15.9%;width:68.2%;height:68.2%;border-radius:50%;background:transparent;transition:background-color .16s}
-.teaser-close:hover::before{background:rgba(255,255,255,.5)}
-.teaser-close:active{transform:scale(.92)}
-.teaser-close:active::before{background:rgba(255,255,255,.7)}
-.teaser-close:focus-visible{outline:3px solid #00b0c7;outline-offset:3px}
+.prototype[data-state="compact"] .teaser-hotspot{left:53.1%;top:34.75%;width:9.385%;height:4.332%}
+.prototype[data-state="compact"][data-teaser-dismissed="true"] .teaser-hotspot{display:none}
+.prototype[data-state="compact"][data-teaser-returning="true"] .teaser-hotspot{pointer-events:none;animation:teaser-hit-in 1.4s both}
+@keyframes teaser-hit-in{from,to{opacity:0}}
+@media(prefers-reduced-motion:reduce){.prototype[data-teaser-returning="true"] .teaser-dot,.prototype[data-teaser-returning="true"] .teaser-card-wrap,.prototype[data-state="compact"][data-teaser-dismissed="false"] .teaser-snow,.teaser-skate{animation:none}.teaser-spark{display:none}}
 .skate-pair-crop{position:absolute;overflow:hidden;pointer-events:none}
 .skate-pair-crop img{position:absolute;left:0;top:0;width:200%;height:100%;max-width:none;object-fit:fill}
 
@@ -82,14 +99,14 @@
 .intro-title{top:43%;font-size:min(1.62vw,42px);font-weight:700;letter-spacing:-.025em;line-height:1.14;animation-delay:.46s}
 .intro-subtitle{top:52%;font-size:min(1.17vw,30px);line-height:1.33;animation-delay:.64s}
 .intro-controls{top:67.1%;display:flex;align-items:center;justify-content:center;gap:1.8%;height:8.2%;animation-delay:.84s}
-.intro-key{display:grid;place-items:center;width:8.8%;height:100%;border-radius:25%;background:#fff;box-shadow:0 2px 7px rgba(82,120,145,.1)}
+.intro-key{display:grid;place-items:center;flex:0 0 8.8%;width:8.8%;height:calc(var(--modal-width) * .0431);border-radius:25%;background:#fff;box-shadow:0 2px 7px rgba(82,120,145,.1)}
 .intro-key svg{display:block;width:45%;height:57%;stroke:#27323c;stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round}
 .intro-or{margin-left:1.8%;font-size:min(1.06vw,28px)}
 .intro-button{z-index:3;left:35.7%;top:80%;width:28.6%;height:10.7%;display:grid;place-items:center;border-radius:clamp(7px,.48vw,13px);background:#009b33;color:#fff;font-size:min(1.12vw,29px);font-weight:700;box-shadow:0 5px 12px rgba(0,120,52,.11);animation-delay:1.08s}
 .intro-button{transition:background-color .18s ease}
 .prototype[data-state="start"] .start-hotspot:hover~.start-intro .intro-button,.prototype[data-state="start"] .start-hotspot:focus-visible~.start-intro .intro-button{background:#008b2e}
 .prototype[data-state="start"] .start-hotspot:active~.start-intro .intro-button{background:#007c29}
-.intro-skates{z-index:4;left:42.6%;top:6.7%;width:14.9%;height:auto;filter:drop-shadow(0 5px 5px rgba(29,75,167,.24)) drop-shadow(0 10px 14px rgba(48,170,229,.18));opacity:0;animation:intro-skates-in 1.05s cubic-bezier(.16,.78,.21,1) 1.36s both}
+.intro-skates{z-index:4;left:42.6%;top:10.7%;width:14.9%;height:auto;filter:drop-shadow(0 5px 5px rgba(29,75,167,.24)) drop-shadow(0 10px 14px rgba(48,170,229,.18));opacity:0;animation:intro-skates-in 1.05s cubic-bezier(.16,.78,.21,1) 1.36s both}
 .prototype[data-state="start"] .close-hotspot{left:60.77%;top:59.3%;width:2.45%;height:2.9%;background:rgba(232,242,252,.91);border:1px solid rgba(255,255,255,.7);border-radius:22%;color:#778ba2;display:grid;place-items:center;font-size:min(1.62vw,42px);line-height:1}
 .prototype[data-state="start"] .close-hotspot::after{content:"×";transform:translateY(-3%)}
 .prototype[data-state="start"] .close-hotspot:hover{background:#fff;color:#526b83}
@@ -115,7 +132,7 @@
 .prototype{container-type:inline-size}
 .field-transition{display:none;position:absolute;z-index:26;left:4.12%;top:57.08%;width:60.96%;height:33.08%;overflow:hidden;border-radius:var(--game-radius);clip-path:inset(0 round var(--game-radius));pointer-events:none;isolation:isolate}
 .field-transition-teaser,.field-transition-ice{position:absolute;inset:0}
-.field-transition-teaser{background:url("ui-compact.png") -1.45cqw -49.03cqw/100cqw 85.23cqw no-repeat}
+.field-transition-teaser{background:url("teaser-new.png") center/100% 100% no-repeat}
 .field-transition-ice{background:radial-gradient(ellipse 79% 121% at 100% 0%,rgba(42,81,170,.52),rgba(42,81,170,.27) 47%,transparent 84%),radial-gradient(ellipse 73% 119% at 0% 100%,rgba(0,165,192,.64),rgba(0,165,192,.3) 49%,transparent 87%),url("figma-intro-ice.png") center/100% 100% no-repeat}
 .prototype[data-field-transition="opening"] .field-transition{display:block;animation:field-grow .8s cubic-bezier(.2,.8,.2,1) both}
 .prototype[data-field-transition="opening"] .field-transition-teaser{animation:field-teaser-out .48s ease both}
@@ -126,11 +143,11 @@
 .prototype[data-field-transition="closing"] .field-transition-teaser{animation:field-teaser-in .3s ease .5s both}
 .prototype[data-field-transition="closing"] .field-transition-ice{animation:field-ice-out .3s ease .5s both}
 .prototype[data-field-transition="opening"] .teaser-erasure,.prototype[data-field-transition="closing"] .teaser-erasure,.prototype[data-field-transition="playing-close"] .teaser-erasure,.prototype[data-field-transition="round-close"] .teaser-erasure{display:block}
-.prototype[data-field-transition="opening"] .teaser-hotspot,.prototype[data-field-transition="opening"] .teaser-close,.prototype[data-field-transition="playing-close"] .close-hotspot,.prototype[data-field-transition="round-close"] .close-hotspot{display:none}
+.prototype[data-field-transition="opening"] .teaser-art,.prototype[data-field-transition="closing"] .teaser-art,.prototype[data-field-transition="playing-close"] .teaser-art,.prototype[data-field-transition="round-close"] .teaser-art,.prototype[data-field-transition="opening"] .teaser-hotspot,.prototype[data-field-transition="closing"] .teaser-hotspot,.prototype[data-field-transition="playing-close"] .teaser-hotspot,.prototype[data-field-transition="round-close"] .teaser-hotspot,.prototype[data-field-transition="playing-close"] .close-hotspot,.prototype[data-field-transition="round-close"] .close-hotspot{display:none}
 .prototype[data-field-transition="playing-close"] .playfield,.prototype[data-field-transition="round-close"] .static-game{z-index:21;animation:field-shrink .8s cubic-bezier(.2,.8,.2,1) both}
 .prototype[data-field-transition="playing-close"] .hud-live,.prototype[data-field-transition="round-close"] .static-hud,.prototype[data-field-transition="round-close"] .frame-snow{animation:field-overlay-out .3s ease both}
-@keyframes field-grow{from{left:1.45%;top:57.53%;width:9.55%;height:10.65%;border-radius:20%}to{left:4.12%;top:57.08%;width:60.96%;height:33.08%;border-radius:var(--game-radius)}}
-@keyframes field-shrink{from{left:4.12%;top:57.08%;width:60.96%;height:33.08%;border-radius:var(--game-radius)}to{left:1.45%;top:57.53%;width:9.55%;height:10.65%;border-radius:20%}}
+@keyframes field-grow{from{left:53.1%;top:34.75%;width:9.385%;height:4.332%;border-radius:10% / 25%}to{left:4.12%;top:57.08%;width:60.96%;height:33.08%;border-radius:var(--game-radius)}}
+@keyframes field-shrink{from{left:4.12%;top:57.08%;width:60.96%;height:33.08%;border-radius:var(--game-radius)}to{left:53.1%;top:34.75%;width:9.385%;height:4.332%;border-radius:10% / 25%}}
 @keyframes field-teaser-out{from{opacity:1}to{opacity:0}}
 @keyframes field-ice-in{from{opacity:0}to{opacity:1}}
 @keyframes field-teaser-in{from{opacity:0}to{opacity:1}}
@@ -142,6 +159,7 @@
 .prototype[data-state="playing"] .hud-live>span{animation:hud-chip-in .64s cubic-bezier(.18,.82,.25,1) both}
 .prototype[data-state="playing"] .hud-live>span:nth-child(2){animation-delay:.14s}
 .prototype[data-state="playing"] .hud-live>span:nth-child(3){animation-delay:.28s}
+.prototype[data-state="playing"] .hud-live>span:nth-child(4){animation-delay:.42s}
 @keyframes hud-chip-in{from{opacity:0;transform:translateY(-200%)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.prototype[data-state="playing"] .hud-live>span{animation:none}}
 
@@ -175,7 +193,7 @@
 .prototype[data-state="round-end"] .restart-hotspot{top:84.35%}
 .prototype[data-state="round-end"] .restart-hotspot:hover~.static-game .round-card .green-button,.prototype[data-state="round-end"] .restart-hotspot:focus-visible~.static-game .round-card .green-button{background:#008b2e}
 .prototype[data-state="round-end"] .restart-hotspot:active~.static-game .round-card .green-button{background:#007c29}
-.prototype[data-state="round-end"] .static-skates-result{left:41.9%;top:18.2%;width:16%;filter:drop-shadow(0 5px 5px rgba(29,75,167,.24)) drop-shadow(0 10px 14px rgba(48,170,229,.18));animation:intro-skates-in 1.05s cubic-bezier(.16,.78,.21,1) 1.18s both}
+.prototype[data-state="round-end"] .static-skates-result{left:41.9%;top:22.6%;width:16%;filter:drop-shadow(0 5px 5px rgba(29,75,167,.24)) drop-shadow(0 10px 14px rgba(48,170,229,.18));animation:intro-skates-in 1.05s cubic-bezier(.16,.78,.21,1) 1.18s both}
 .prototype[data-state="round-end"] .close-hotspot{left:60.77%;top:59.3%;width:2.45%;height:2.9%;display:grid;place-items:center;border:1px solid var(--game-glass-border);border-radius:22%;background:var(--game-glass);backdrop-filter:blur(3px);color:#778ba2;font-size:min(1.62vw,42px);line-height:1}
 .prototype[data-state="round-end"] .close-hotspot::after{content:"×";font-size:inherit;transform:translateY(-3%)}
 .prototype[data-state="round-end"] .close-hotspot:hover{background:rgba(255,255,255,.82);color:#526b83}
@@ -192,6 +210,7 @@
 .prototype[data-field-transition="playing-elements-out"] .hud-live>span,.prototype[data-field-transition="round-elements-out"] .hud-live>span{animation:active-hud-out .48s cubic-bezier(.35,.05,.75,.45) both}
 .prototype[data-field-transition="playing-elements-out"] .hud-live>span:nth-child(2),.prototype[data-field-transition="round-elements-out"] .hud-live>span:nth-child(2){animation-delay:.07s}
 .prototype[data-field-transition="playing-elements-out"] .hud-live>span:nth-child(3),.prototype[data-field-transition="round-elements-out"] .hud-live>span:nth-child(3){animation-delay:.14s}
+.prototype[data-field-transition="playing-elements-out"] .hud-live>span:nth-child(4),.prototype[data-field-transition="round-elements-out"] .hud-live>span:nth-child(4){animation-delay:.21s}
 .prototype[data-field-transition="playing-close"] .playfield canvas,.prototype[data-field-transition="playing-close"] .hud-live,.prototype[data-field-transition="round-close"] .hud-live{opacity:0}
 .prototype[data-field-transition="round-elements-out"] .static-skates-result{animation:intro-skates-out .75s cubic-bezier(.16,.78,.21,1) both}
 .prototype[data-field-transition="round-elements-out"] .round-card .green-button{animation:intro-item-out .55s cubic-bezier(.17,.8,.23,1) .13s both}
@@ -216,14 +235,14 @@
 .feedback-button:hover{background:rgba(255,255,255,.76);transform:translateY(-2px)}
 .feedback-button:active{transform:translateY(0) scale(.94)}
 .feedback-button[aria-pressed="true"]{background:#fff;border-color:#fff}
+.feedback-button[aria-pressed="true"]:hover,.feedback-button[aria-pressed="true"]:active{transform:none}
 .feedback-button[aria-pressed="true"] img{filter:brightness(0);opacity:.87}
 .feedback-button:focus-visible{outline:2px solid #009b33;outline-offset:2px}
-.prototype[data-state="final"] .static-skates-result{left:41.9%;top:18.2%;width:16%;filter:drop-shadow(0 5px 5px rgba(29,75,167,.24)) drop-shadow(0 10px 14px rgba(48,170,229,.18));animation:intro-skates-in 1.05s cubic-bezier(.16,.78,.21,1) 1.18s both}
+.prototype[data-state="final"] .static-skates-result{left:41.9%;top:22.6%;width:16%;filter:drop-shadow(0 5px 5px rgba(29,75,167,.24)) drop-shadow(0 10px 14px rgba(48,170,229,.18));animation:intro-skates-in 1.05s cubic-bezier(.16,.78,.21,1) 1.18s both}
 .prototype[data-state="final"] .close-hotspot{left:60.77%;top:66.66%;width:2.45%;height:2.9%;display:grid;place-items:center;border:1px solid var(--game-glass-border);border-radius:22%;background:var(--game-glass);backdrop-filter:blur(3px);color:#778ba2;font-size:min(1.62vw,42px);line-height:1}
 .prototype[data-state="final"] .close-hotspot::after{content:"×";font-size:inherit;transform:translateY(-3%)}
 .prototype[data-state="final"] .close-hotspot:hover{background:rgba(255,255,255,.82);color:#526b83}
 .final-erasure{display:none;position:absolute;z-index:4;left:4.12%;top:64.44%;width:60.96%;height:33.6%;background:#eceef0;pointer-events:none}
-.prototype[data-state="booking"] .final-erasure,.prototype[data-field-transition="final-close"] .final-erasure{display:block}
 .prototype[data-field-transition="final-close"] .close-hotspot{display:none}
 .prototype[data-field-transition="final-close"] .playfield,.prototype[data-field-transition="final-close"] .static-game{animation:final-field-out .65s cubic-bezier(.2,.8,.2,1) both}
 @keyframes final-field-out{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(2%) scale(.98)}}
@@ -236,5 +255,121 @@
 
 /* The reference PNGs contain two baked white pixels below the game viewport. */
 .game-bottom-cleanup{display:none;position:absolute;z-index:4;left:4.12%;top:90.16%;width:60.96%;height:12px;background:#eceef0;pointer-events:none}
-.prototype[data-state="start"] .game-bottom-cleanup,.prototype[data-state="playing"] .game-bottom-cleanup,.prototype[data-state="round-end"] .game-bottom-cleanup,.prototype[data-state="final"] .game-bottom-cleanup{display:block}
-.prototype[data-state="final"] .game-bottom-cleanup{top:97.52%}
+.prototype[data-state="start"] .game-bottom-cleanup,.prototype[data-state="playing"] .game-bottom-cleanup,.prototype[data-state="round-end"] .game-bottom-cleanup{display:block}
+
+/* The booking page stays in place while the taller game opens as a modal. */
+:root{
+  --modal-width:clamp(463px,60.96vw,1585px);
+  --modal-height:calc(var(--modal-width) * 900 / 1585);
+  --modal-left:calc(50vw - var(--modal-width) / 2);
+  --modal-top:calc(50vh - var(--modal-height) / 2);
+  --stage-width:clamp(760px,100vw,2600px);
+  --stage-left:max(0px,calc((100vw - 2600px) / 2));
+  --stage-top:0px;
+  --teaser-left:calc(var(--stage-left) + var(--stage-width) * .531);
+  --teaser-top:calc(var(--stage-top) + var(--stage-width) * 2216 / 2600 * .3475);
+  --teaser-width:calc(var(--stage-width) * .09385);
+  --teaser-height:calc(var(--stage-width) * 2216 / 2600 * .04332);
+}
+.game-modal-overlay{display:none;position:fixed;z-index:4;inset:0;background:rgba(0,0,0,.54);pointer-events:auto}
+.prototype[data-state="start"] .game-modal-overlay,
+.prototype[data-state="playing"] .game-modal-overlay,
+.prototype[data-state="round-end"] .game-modal-overlay,
+.prototype[data-state="final"] .game-modal-overlay{display:block}
+.prototype[data-field-transition="opening"] .game-modal-overlay{display:block;animation:modal-overlay-in .55s ease-out both}
+.prototype[data-field-transition="closing"] .game-modal-overlay,
+.prototype[data-field-transition="playing-close"] .game-modal-overlay,
+.prototype[data-field-transition="round-close"] .game-modal-overlay{display:block;animation:modal-overlay-out .8s ease-in-out both}
+.prototype[data-field-transition="final-close"] .game-modal-overlay{display:block;animation:modal-overlay-out .65s ease-in both}
+@keyframes modal-overlay-in{from{opacity:0}to{opacity:1}}
+@keyframes modal-overlay-out{from{opacity:1}to{opacity:0}}
+
+.playfield,.static-game,.start-intro,.frame-snow,.field-transition{
+  position:fixed;left:var(--modal-left);top:var(--modal-top);
+  width:var(--modal-width);height:var(--modal-height);
+  box-shadow:0 24px 70px rgba(10,25,50,.24),0 3px 15px rgba(10,25,50,.13)
+}
+.hud-live,.static-hud{top:calc(var(--modal-width) * .0305);height:calc(var(--modal-width) * .0404)}
+.field-transition{background:#c7e9f5;transform-origin:top left;will-change:transform,opacity}
+.prototype[data-state="final"] .playfield,
+.prototype[data-state="final"] .static-game,
+.prototype[data-state="final"] .frame-snow{top:var(--modal-top)}
+.start-hotspot,.restart-hotspot,.close-hotspot{position:fixed}
+.prototype[data-state="start"] .start-hotspot{
+  left:calc(var(--modal-left) + var(--modal-width) * .354);
+  top:calc(var(--modal-top) + var(--modal-height) * .79);
+  width:calc(var(--modal-width) * .292);height:calc(var(--modal-height) * .145)
+}
+.prototype[data-state="round-end"] .restart-hotspot{
+  left:calc(var(--modal-left) + var(--modal-width) * .354);
+  top:calc(var(--modal-top) + var(--modal-height) * .824);
+  width:calc(var(--modal-width) * .292);height:calc(var(--modal-height) * .145)
+}
+.prototype[data-state="start"] .close-hotspot,
+.prototype[data-state="playing"] .close-hotspot,
+.prototype[data-state="round-end"] .close-hotspot,
+.prototype[data-state="final"] .close-hotspot{
+  left:calc(var(--modal-left) + var(--modal-width) * .9293);
+  top:calc(var(--modal-top) + var(--modal-width) * .0305);
+  width:calc(var(--modal-width) * .0402);height:calc(var(--modal-width) * .0402)
+}
+.prototype[data-state] .close-hotspot::before,
+.prototype[data-state] .close-hotspot::after{
+  content:"";position:absolute;left:50%;top:50%;width:46%;height:1.4px;
+  border-radius:999px;background:currentColor;transform:translate(-50%,-50%) rotate(45deg)
+}
+.prototype[data-state] .close-hotspot::after{transform:translate(-50%,-50%) rotate(-45deg)}
+
+/* Remove the flattened, old in-page game from the reference screenshots. */
+.game-bottom-cleanup{z-index:3;left:4.12%;top:57.08%;width:60.96%;height:calc(33.08% + 16px);background:#eceef0}
+.prototype[data-state="start"] .game-bottom-cleanup,
+.prototype[data-state="playing"] .game-bottom-cleanup{display:none}
+.prototype[data-round="1"][data-state="compact"] .game-bottom-cleanup,
+.prototype[data-round="1"][data-state="start"] .game-bottom-cleanup,
+.prototype[data-round="1"][data-state="playing"] .game-bottom-cleanup,
+.prototype[data-state="round-end"] .game-bottom-cleanup{display:block}
+.prototype[data-round="0"][data-state="start"] .teaser-erasure,
+.prototype[data-round="0"][data-state="playing"] .teaser-erasure{display:block;z-index:3}
+.prototype[data-round="1"] .teaser-erasure,
+.prototype[data-round="2"] .teaser-erasure{display:none}
+.prototype[data-field-transition="opening"] .teaser-erasure,
+.prototype[data-field-transition="closing"] .teaser-erasure,
+.prototype[data-field-transition="playing-close"] .teaser-erasure,
+.prototype[data-field-transition="round-close"] .teaser-erasure{z-index:3}
+
+/* The teaser expands into the center of the viewport; internal card choreography is unchanged. */
+.prototype[data-field-transition="opening"] .field-transition{animation:modal-field-grow .8s cubic-bezier(.19,.78,.22,1) both}
+.prototype[data-field-transition="opening"] .field-transition-teaser{animation:field-teaser-out .18s ease-out both}
+.prototype[data-field-transition="opening"] .field-transition-ice{animation:field-ice-in .42s ease-out .04s both}
+.prototype[data-field-transition="closing"] .field-transition,
+.prototype[data-field-transition="playing-close"] .playfield,
+.prototype[data-field-transition="round-close"] .playfield{transform-origin:top left;will-change:transform,opacity;animation:modal-field-shrink .8s cubic-bezier(.3,.05,.65,1) both}
+.prototype[data-field-transition="round-close"] .static-game{animation:none}
+.prototype[data-field-transition="closing"] .field-transition-teaser{opacity:0;animation:none}
+.prototype[data-field-transition="closing"] .field-transition-ice{opacity:1;animation:none}
+.prototype[data-field-transition="closing"] .teaser-art,
+.prototype[data-field-transition="playing-close"] .teaser-art,
+.prototype[data-field-transition="round-close"] .teaser-art{display:block;animation:modal-teaser-in .2s ease-out .6s both}
+.prototype[data-state="playing"][data-field-transition="playing-elements-out"] .close-hotspot,
+.prototype[data-state="playing"][data-field-transition="playing-close"] .close-hotspot,
+.prototype[data-state="round-end"][data-field-transition="round-elements-out"] .close-hotspot,
+.prototype[data-state="round-end"][data-field-transition="round-close"] .close-hotspot,
+.prototype[data-state="final"][data-field-transition="final-close"] .close-hotspot{display:none}
+@keyframes modal-teaser-in{from{opacity:0}to{opacity:1}}
+@keyframes modal-field-grow{
+  from{transform:translate(var(--collapse-x),var(--collapse-y)) scale(var(--collapse-scale-x),var(--collapse-scale-y));opacity:.88}
+  to{transform:translate(0,0) scale(1);opacity:1}
+}
+@keyframes modal-field-shrink{
+  from{transform:translate(0,0) scale(1);opacity:1}
+  76%{opacity:1}
+  to{transform:translate(var(--collapse-x),var(--collapse-y)) scale(var(--collapse-scale-x),var(--collapse-scale-y));opacity:0}
+}
+.prototype[data-field-transition="final-close"] .playfield,
+.prototype[data-field-transition="final-close"] .static-game{animation:modal-final-out .65s cubic-bezier(.3,.04,.7,.35) both}
+@keyframes modal-final-out{to{opacity:0;transform:translateY(22px) scale(.97)}}
+@media(prefers-reduced-motion:reduce){
+  .game-modal-overlay{animation:none!important}
+  .prototype[data-state="start"] .start-intro{display:block}
+  .prototype[data-state="start"] .start-intro>*{animation:none;opacity:1}
+}

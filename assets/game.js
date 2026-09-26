@@ -1,26 +1,42 @@
 const $=id=>document.getElementById(id),stage=$('prototype'),screen=$('screen'),game=$('playfield'),canvas=$('gameCanvas'),toast=$('toast');
 let ctx=canvas.getContext('2d'),closingSkates=null;
-const screens={compact:'assets/ui-compact.png',start:'assets/ui-start.png',playing:'assets/ui-playing.png',hit:'assets/ui-hit.png','round-end':'assets/ui-round-end.png',final:'assets/ui-final.png',booking:'assets/ui-final.png'};
+const screens={compact:'assets/ui-compact.png',start:'assets/ui-start.png',playing:'assets/ui-playing.png',hit:'assets/ui-hit.png','round-end':'assets/ui-round-end.png',final:'assets/ui-booking-accepted.png',booking:'assets/ui-booking-accepted.png'};
 const screenPreloads={};
 const screenReady={};
-for(const name of ['start','playing','round-end','final']){const image=new Image();screenPreloads[name]=image;image.src=screens[name];screenReady[name]=image.decode().catch(()=>{})}
-const TEASER_HIDE_MS=2000,TEASER_FADE_MS=800;
+for(const name of ['start','playing','round-end','final','booking']){const image=new Image();screenPreloads[name]=image;image.src=screens[name];screenReady[name]=image.decode().catch(()=>{})}
+const TEASER_REVEAL_MS=1500;
 const FIELD_MORPH_MS=800,FIELD_REVEAL_MS=240,FIELD_ELEMENTS_EXIT_MS=1050;
 const PLAY_ENTRY_MS=1950,SKATES_ENTRY_DELAY_MS=1000,SKATES_ENTRY_MS=900;
 const SKATES_GAME_WIDTH=.21,SKATES_GAME_HEIGHT_RATIO=.60,SKATES_START_X=.17,SKATES_START_Y=.508;
 const ROUND_WORLD=8.86,ROUND_METERS=30,BASE_SPEED=.27,ICE_BOOST_SPEED=.33,ICE_BOOST_DECAY=1.15;
-let teaserHiddenUntil=Number(sessionStorage.getItem('ice-teaser-hidden-until'))||0,teaserDismissed=teaserHiddenUntil>Date.now(),teaserReturnTimer=0,teaserFadeTimer=0;
-teaserHiddenUntil=Math.min(teaserHiddenUntil,Date.now()+TEASER_HIDE_MS);
-stage.dataset.teaserDismissed=String(teaserDismissed);stage.dataset.teaserReturning='false';
+stage.dataset.teaserDismissed='false';stage.dataset.teaserReturning='true';
 sessionStorage.removeItem('ice-teaser-dismissed');
 let state='compact',W=0,H=0,dpr=1,running=false,demo=false,terminal=false,closing=false,closeTimer=0,fieldTransitioning=false,fieldTimer=0,exitTarget='compact',exitDemo=false,playEntryAt=0,playEntryDuration=0,round=0,score=0,count=0,world=0,roundElapsed=0,boost=0,last=0,raf=0;
-let combo=0;
+let combo=0,lastFirstIceY=null;
 let player={x:SKATES_START_X,y:SKATES_START_Y,target:SKATES_START_Y,lean:0},keys={up:false,down:false},puddles=[],particles=[];
 const skatesSource=new Image();let skatesSprite=null;skatesSource.src='assets/iridescent-skates-top.png';skatesSource.onload=()=>{const c=document.createElement('canvas');c.width=skatesSource.naturalWidth;c.height=skatesSource.naturalHeight;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(skatesSource,0,0);const im=x.getImageData(0,0,c.width,c.height),d=im.data;for(let i=0;i<d.length;i+=4){const r=d[i],g=d[i+1],b=d[i+2];if(r>165&&g>45&&g<195&&b<115&&r>g*1.28&&g>b*1.28)d[i+3]=0}x.putImageData(im,0,0);skatesSprite=c};
 const iceSequence=[[.72,.68,.35,.28,30],[1.15,.38,.28,.25,10],[1.58,.57,.39,.30,30],[2.02,.75,.29,.25,10],[2.46,.31,.35,.28,30],[2.89,.55,.28,.25,10],[3.33,.72,.39,.30,30],[3.77,.40,.29,.25,10],[4.20,.61,.35,.28,30],[4.64,.28,.28,.25,10],[5.08,.48,.39,.30,30],[5.52,.73,.29,.25,10]];
 const layout=Array.from({length:19},(_,i)=>{const cycle=Math.floor(i/iceSequence.length),p=iceSequence[i%iceSequence.length];return[p[0]+cycle*5.28,Math.max(.28,Math.min(.75,p[1]+(cycle===1?.035:cycle===2?-.025:0))),p[2],p[3],p[4]]});
-function setState(next){screen.src=next==='playing'&&round>0?screens['round-end']:screens[next];state=next;stage.dataset.state=next;document.querySelector('.static-game').setAttribute('aria-hidden',String(next!=='final'));if(next!=='start'){closing=false;stage.dataset.closing='false'}}
-function resetPuddles(){combo=0;puddles=layout.map((p,i)=>({base:p[0],y:p[1],w:p[2],h:p[3],pts:p[4],hit:false,traversing:false,passed:false,rideTime:0,centeredTime:0,lastRideAt:null,id:i}))}
+function setState(next){screen.src=['compact','start','playing'].includes(next)?round>0?screens['round-end']:screens.compact:screens[next];state=next;stage.dataset.state=next;stage.dataset.round=String(round);document.querySelector('.static-game').setAttribute('aria-hidden',String(next!=='final'));if(next!=='start'){closing=false;stage.dataset.closing='false'}}
+function resetPuddles(){
+  combo=0;
+  let previousY=SKATES_START_Y;
+  puddles=layout.map((p,i)=>{
+    let y;
+    if(i===0){
+      y=.31+Math.random()*.42;
+      for(let attempt=0;lastFirstIceY!==null&&Math.abs(y-lastFirstIceY)<.14&&attempt<8;attempt++)y=.31+Math.random()*.42;
+      if(lastFirstIceY!==null&&Math.abs(y-lastFirstIceY)<.14)y=lastFirstIceY<.52?.73:.31;
+      lastFirstIceY=y;
+    }else{
+      const step=.13+Math.random()*.15,direction=Math.random()<.5?-1:1;
+      const nextY=previousY+step*direction;
+      y=Math.max(.31,Math.min(.73,nextY<.31||nextY>.73?previousY-step*direction:nextY));
+    }
+    previousY=y;
+    return {base:p[0]+(Math.random()-.5)*.05,y,w:p[2],h:p[3]*.8,pts:p[4],hit:false,traversing:false,passed:false,rideTime:0,centeredTime:0,lastRideAt:null,id:i};
+  });
+}
 function createSnow(){document.querySelectorAll('.snow').forEach(s=>{
   const f=document.createDocumentFragment(),teaser=s.classList.contains('teaser-snow');
   for(let i=0;i<(teaser?26:78);i++){
@@ -40,11 +56,12 @@ function createSnow(){document.querySelectorAll('.snow').forEach(s=>{
   }
   s.replaceChildren(f);
 })}
-function resize(){const r=game.getBoundingClientRect();W=r.width;H=r.height;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(1,W*dpr);canvas.height=Math.max(1,H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
-function play(isDemo=false){setState('playing');running=true;demo=isDemo;score=0;count=0;world=0;roundElapsed=0;boost=0;player.y=SKATES_START_Y;player.target=SKATES_START_Y;last=performance.now();playEntryAt=last;playEntryDuration=matchMedia('(prefers-reduced-motion: reduce)').matches?0:PLAY_ENTRY_MS;resetPuddles();particles=[];$('score').textContent=0;$('puddlesCount').textContent=0;$('clock').textContent='00:00';$('distance').textContent=`До финиша ${ROUND_METERS} м`;requestAnimationFrame(()=>{resize();game.focus();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)})}
+function measureModal(){const r=stage.getBoundingClientRect(),modalWidth=r.width*.6096,modalHeight=modalWidth*900/1585,modalLeft=(innerWidth-modalWidth)/2,modalTop=(innerHeight-modalHeight)/2,teaserWidth=r.width*.09385,teaserHeight=r.height*.04332;stage.style.setProperty('--stage-width',`${r.width}px`);stage.style.setProperty('--stage-left',`${r.left}px`);stage.style.setProperty('--stage-top',`${r.top}px`);stage.style.setProperty('--modal-width',`${modalWidth}px`);stage.style.setProperty('--collapse-x',`${r.left+r.width*.531-modalLeft}px`);stage.style.setProperty('--collapse-y',`${r.top+r.height*.3475-modalTop}px`);stage.style.setProperty('--collapse-scale-x',String(teaserWidth/modalWidth));stage.style.setProperty('--collapse-scale-y',String(teaserHeight/modalHeight))}
+function resize(){measureModal();const r=game.getBoundingClientRect();W=r.width;H=r.height;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(1,W*dpr);canvas.height=Math.max(1,H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
+function play(isDemo=false){setState('playing');running=true;demo=isDemo;score=0;count=0;world=0;roundElapsed=0;boost=0;player.y=SKATES_START_Y;player.target=SKATES_START_Y;last=performance.now();playEntryAt=last;playEntryDuration=matchMedia('(prefers-reduced-motion: reduce)').matches?0:PLAY_ENTRY_MS;resetPuddles();particles=[];$('score').textContent=0;$('puddlesCount').textContent=0;$('clock').textContent='00:00';$('distance').textContent=`${ROUND_METERS} м`;requestAnimationFrame(()=>{resize();game.focus();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)})}
 async function start(isDemo=false){if(terminal||closing||fieldTransitioning)return;const requestedState=state;await screenReady.playing;if(terminal||closing||fieldTransitioning||state!==requestedState)return;if(state==='start'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){beginIntroExit('playing',isDemo);return}play(isDemo)}
 function stop(){running=false;cancelAnimationFrame(raf)}
-function finishRound(){stop();clearTimeout(awardIce.t);toast.classList.remove('show');ctx.clearRect(0,0,W,H);$('resultClock').textContent=$('clock').textContent;$('resultPuddles').textContent=count;$('resultScore').textContent=score;$('roundResult').textContent=`${score} очков`;$('finalResult').textContent=`${score} очков`;round++;if(round===1)setState('round-end');else{terminal=true;setState('final')}}
+function finishRound(){stop();clearTimeout(awardIce.t);toast.classList.remove('show');ctx.clearRect(0,0,W,H);$('resultClock').textContent=$('clock').textContent;$('resultDistance').textContent=$('distance').textContent;$('resultPuddles').textContent=count;$('resultScore').textContent=score;$('roundResult').textContent=`${score} очков`;$('finalResult').textContent=`${score} очков`;round++;if(round===1)setState('round-end');else{terminal=true;setState('final')}}
 function touchIce(p){p.hit=true;boost=1;count++;$('puddlesCount').textContent=count}
 const iceMessages={10:['Лёд пойман','Есть скольжение','Держи середину'],30:['Крупная льдина','Хороший проезд','Следующую — точнее']};
 function awardIce(p){
@@ -62,9 +79,43 @@ function awardIce(p){
   clearTimeout(awardIce.t);
   awardIce.t=setTimeout(()=>toast.classList.remove('show'),1100);
 }
-function updateProgress(){const seconds=Math.floor(roundElapsed),minutes=Math.floor(seconds/60);$('clock').textContent=`${String(minutes).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`;$('distance').textContent=`До финиша ${Math.max(0,Math.ceil(ROUND_METERS*(1-world/ROUND_WORLD)))} м`}
+function updateProgress(){const seconds=Math.floor(roundElapsed),minutes=Math.floor(seconds/60);$('clock').textContent=`${String(minutes).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`;$('distance').textContent=`${Math.max(0,Math.ceil(ROUND_METERS*(1-world/ROUND_WORLD)))} м`}
 const px=p=>(p.base-world)*W;
-function loop(now){if(!running)return;const dt=Math.min((now-last)/1000,.035);last=now;if(now-playEntryAt<playEntryDuration){const t=Math.max(0,Math.min(1,(now-playEntryAt-SKATES_ENTRY_DELAY_MS)/SKATES_ENTRY_MS)),ease=1-Math.pow(1-t,3)+Math.sin(Math.PI*t)*.015,w=W*SKATES_GAME_WIDTH,x=-w/2-12+(player.x*W+w/2+12)*ease;ctx.clearRect(0,0,W,H);drawPuddles();if(t>0){ctx.save();ctx.globalAlpha=t;drawTrail(x);ctx.restore()}drawPlayer(x);raf=requestAnimationFrame(loop);return}roundElapsed+=dt;boost=Math.max(0,boost-dt*ICE_BOOST_DECAY);world+=dt*(BASE_SPEED+ICE_BOOST_SPEED*boost);if(demo){const current=puddles.find(p=>p.hit&&p.traversing&&!p.passed),next=puddles.filter(p=>!p.hit).map(p=>({...p,sx:px(p)})).filter(p=>p.sx>W*.15&&p.sx<W*.83).sort((a,b)=>a.sx-b.sx)[0];player.target=current?current.y:next?next.y:.56}else{if(keys.up)player.target-=dt*.64;if(keys.down)player.target+=dt*.64}player.target=Math.max(.24,Math.min(.80,player.target));const before=player.y;player.y+=(player.target-player.y)*Math.min(1,dt*5.8);player.lean=(player.y-before)/Math.max(dt,.001);ctx.clearRect(0,0,W,H);drawSpeed();drawPuddles();drawTrail();drawPlayer();drawParticles(dt);updateProgress();if(world>=ROUND_WORLD)finishRound();else raf=requestAnimationFrame(loop)}
+function loop(now){
+  if(!running)return;
+  const dt=Math.min((now-last)/1000,.035);
+  last=now;
+  if(now-playEntryAt<playEntryDuration){
+    const elapsed=now-playEntryAt;
+    const t=Math.max(0,Math.min(1,(elapsed-SKATES_ENTRY_DELAY_MS)/SKATES_ENTRY_MS));
+    const ease=1-Math.pow(1-t,3)+Math.sin(Math.PI*t)*.015;
+    const w=W*SKATES_GAME_WIDTH,x=-w/2-12+(player.x*W+w/2+12)*ease;
+    const iceOffset=.56*(1-elapsed/playEntryDuration);
+    ctx.clearRect(0,0,W,H);
+    drawPuddles(true,iceOffset);
+    if(t>0){ctx.save();ctx.globalAlpha=t;drawTrail(x);ctx.restore()}
+    drawPlayer(x);
+    raf=requestAnimationFrame(loop);
+    return;
+  }
+  roundElapsed+=dt;
+  boost=Math.max(0,boost-dt*ICE_BOOST_DECAY);
+  world+=dt*(BASE_SPEED+ICE_BOOST_SPEED*boost);
+  if(demo){
+    const current=puddles.find(p=>p.hit&&p.traversing&&!p.passed),next=puddles.filter(p=>!p.hit).map(p=>({...p,sx:px(p)})).filter(p=>p.sx>W*.15&&p.sx<W*.83).sort((a,b)=>a.sx-b.sx)[0];
+    player.target=current?current.y:next?next.y:.56;
+  }else{
+    if(keys.up)player.target-=dt*.64;
+    if(keys.down)player.target+=dt*.64;
+  }
+  player.target=Math.max(.24,Math.min(.80,player.target));
+  const before=player.y;
+  player.y+=(player.target-player.y)*Math.min(1,dt*5.8);
+  player.lean=(player.y-before)/Math.max(dt,.001);
+  ctx.clearRect(0,0,W,H);
+  drawSpeed();drawPuddles();drawTrail();drawPlayer();drawParticles(dt);updateProgress();
+  if(world>=ROUND_WORLD)finishRound();else raf=requestAnimationFrame(loop);
+}
 function puddlePath(ww,hh,id){
   ctx.beginPath();
   for(let i=0;i<=32;i++){
@@ -76,9 +127,9 @@ function puddlePath(ww,hh,id){
   ctx.closePath();
 }
 function iceRand(id,salt){const value=Math.sin((id+1)*127.1+salt*311.7)*43758.5453;return value-Math.floor(value)}
-function drawPuddles(visualOnly=false){
+function drawPuddles(visualOnly=false,entryOffset=0){
   puddles.forEach(p=>{
-    const x=px(p),y=p.y*H;
+    const x=px(p)+entryOffset*W,y=p.y*H;
     if(x<-W*.3||x>W*1.3)return;
     const ww=p.w*W,hh=p.h*H;
     ctx.save();
@@ -179,7 +230,7 @@ function drawPlayer(x=player.x*W){const y=player.y*H,w=W*SKATES_GAME_WIDTH,h=w*S
 function drawParticles(dt){particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx-=45*dt;p.a-=dt*1.5;ctx.fillStyle=`rgba(235,255,255,${Math.max(0,p.a)})`;ctx.beginPath();ctx.arc(p.x,p.y,1+Math.random()*2,0,Math.PI*2);ctx.fill()});particles=particles.filter(p=>p.a>0)}
 function setKey(k,v){if(['ArrowUp','w','W'].includes(k))keys.up=v;if(['ArrowDown','s','S'].includes(k))keys.down=v}
 function bindHold(id,key){const e=$(id);['pointerdown','touchstart'].forEach(ev=>e.addEventListener(ev,x=>{x.preventDefault();keys[key]=true}));['pointerup','pointerleave','touchend'].forEach(ev=>e.addEventListener(ev,()=>keys[key]=false))}
-createSnow();resetPuddles();window.addEventListener('resize',()=>{if(running)resize()});window.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','w','W','s','S'].includes(e.key)){e.preventDefault();if(state==='start')start(false);if(running)setKey(e.key,true)}});window.addEventListener('keyup',e=>setKey(e.key,false));
+createSnow();resetPuddles();measureModal();window.addEventListener('resize',()=>{measureModal();if(running)resize()});window.addEventListener('scroll',measureModal,{passive:true});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&['start','playing','round-end','final'].includes(state)){e.preventDefault();$('closeBtn').click();return}if(['ArrowUp','ArrowDown','w','W','s','S'].includes(e.key)){e.preventDefault();if(state==='start')start(false);if(running)setKey(e.key,true)}});window.addEventListener('keyup',e=>setKey(e.key,false));
 async function openStart(){if(terminal||fieldTransitioning)return;fieldTransitioning=true;await screenReady.start;if(terminal||state!=='compact'){fieldTransitioning=false;return}if(matchMedia('(prefers-reduced-motion: reduce)').matches){setState('start');fieldTransitioning=false;return}stage.dataset.fieldTransition='opening';fieldTimer=setTimeout(()=>{setState('start');stage.dataset.fieldTransition='reveal';fieldTimer=setTimeout(()=>{stage.dataset.fieldTransition='';fieldTransitioning=false},FIELD_REVEAL_MS)},FIELD_MORPH_MS)}
 function shrinkIntroField(){fieldTransitioning=true;stage.dataset.fieldTransition='closing';setState('compact');fieldTimer=setTimeout(()=>{stage.dataset.fieldTransition='';fieldTransitioning=false},FIELD_MORPH_MS)}
 function shrinkActiveField(){
@@ -206,7 +257,7 @@ function shrinkActiveField(){
   }
   stage.dataset.fieldTransition=closingRound?'round-elements-out':'playing-elements-out';
   fieldTimer=setTimeout(()=>{
-    screen.src=screens.compact;
+    screen.src=round>0?screens['round-end']:screens.compact;
     stage.dataset.fieldTransition=closingRound?'round-close':'playing-close';
     fieldTimer=setTimeout(()=>{
       setState('compact');
@@ -220,8 +271,6 @@ function shrinkActiveField(){
 function shrinkFinalField(){if(fieldTransitioning)return;fieldTransitioning=true;stage.dataset.fieldTransition='final-close';fieldTimer=setTimeout(()=>{setState('booking');stage.dataset.fieldTransition='';fieldTransitioning=false},650)}
 function finishIntroExit(){if(!closing)return;clearTimeout(closeTimer);closing=false;stage.dataset.closing='false';if(exitTarget==='playing')play(exitDemo);else shrinkIntroField();stage.dataset.exitTarget=''}
 function beginIntroExit(target,isDemo=false){if(closing)return;closing=true;exitTarget=target;exitDemo=isDemo;stage.dataset.exitTarget=target;stage.dataset.closing='true';const card=document.querySelector('.intro-card');card.addEventListener('animationend',e=>{if(e.animationName==='intro-card-out')finishIntroExit()},{once:true});closeTimer=setTimeout(finishIntroExit,2600)}
-$('teaserBtn').addEventListener('click',openStart);$('startBtn').addEventListener('click',()=>start(false));$('restartBtn').addEventListener('click',()=>start(false));$('closeBtn').addEventListener('click',()=>{if(closing||fieldTransitioning)return;if(state==='final'){if(matchMedia('(prefers-reduced-motion: reduce)').matches)setState('booking');else shrinkFinalField();return}if(terminal)return;if(state==='start'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){beginIntroExit('compact');return}if((state==='playing'||state==='round-end')&&!matchMedia('(prefers-reduced-motion: reduce)').matches){shrinkActiveField();return}stop();setState('compact')});document.querySelectorAll('.feedback-button').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.feedback-button').forEach(option=>option.setAttribute('aria-pressed',String(option===button)))}));bindHold('upBtn','up');bindHold('downBtn','down');
-function revealTeaser(){stage.dataset.teaserReturning='true';teaserFadeTimer=setTimeout(()=>{teaserDismissed=false;stage.dataset.teaserDismissed='false';stage.dataset.teaserReturning='false';sessionStorage.removeItem('ice-teaser-hidden-until')},TEASER_FADE_MS)}
-if(teaserDismissed)teaserReturnTimer=setTimeout(revealTeaser,Math.max(0,teaserHiddenUntil-Date.now()));
-$('teaserCloseBtn').addEventListener('click',e=>{e.stopPropagation();clearTimeout(teaserReturnTimer);clearTimeout(teaserFadeTimer);teaserDismissed=true;stage.dataset.teaserDismissed='true';stage.dataset.teaserReturning='false';teaserHiddenUntil=Date.now()+TEASER_HIDE_MS;sessionStorage.setItem('ice-teaser-hidden-until',String(teaserHiddenUntil));teaserReturnTimer=setTimeout(revealTeaser,TEASER_HIDE_MS)});
+$('teaserBtn').addEventListener('click',openStart);$('startBtn').addEventListener('click',()=>start(false));$('restartBtn').addEventListener('click',()=>start(false));$('closeBtn').addEventListener('click',()=>{if(closing||fieldTransitioning)return;if(state==='final'){if(matchMedia('(prefers-reduced-motion: reduce)').matches)setState('booking');else shrinkFinalField();return}if(terminal)return;if(state==='start'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){beginIntroExit('compact');return}if((state==='playing'||state==='round-end')&&!matchMedia('(prefers-reduced-motion: reduce)').matches){shrinkActiveField();return}stop();setState('compact')});document.querySelector('.game-modal-overlay').addEventListener('click',()=>$('closeBtn').click());document.querySelectorAll('.feedback-button').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.feedback-button').forEach(option=>option.setAttribute('aria-pressed',String(option===button)))}));bindHold('upBtn','up');bindHold('downBtn','down');
+setTimeout(()=>{stage.dataset.teaserReturning='false'},TEASER_REVEAL_MS);
 const webContext=document.modelContext;if(webContext?.registerTool){const a=new AbortController();Promise.resolve(webContext.registerTool({name:'start_ice_route',title:'Начать ледяную дорогу',description:'Открывает и запускает мини-игру.',inputSchema:{type:'object',properties:{mode:{type:'string',enum:['play','demo']}},required:['mode'],additionalProperties:false},annotations:{readOnlyHint:false},execute(input){start(input.mode==='demo');return{status:'started',mode:input.mode}}},{signal:a.signal})).catch(()=>{});Promise.resolve(webContext.registerTool({name:'read_ice_route_score',title:'Счёт ледяной дороги',description:'Возвращает состояние игры.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute(){return{status:terminal?'finished':running?'running':state,score,puddles:count,round}}},{signal:a.signal})).catch(()=>{})}
